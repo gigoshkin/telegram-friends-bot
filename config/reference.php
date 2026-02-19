@@ -898,6 +898,24 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     enable_profiler?: bool|Param, // Whether or not to enable the profiler collector to calculate and visualize migration status. This adds some queries overhead. // Default: false
  *     transactional?: bool|Param, // Whether or not to wrap migrations in a single transaction. // Default: true
  * }
+ * @psalm-type NutgramConfig = array{
+ *     token?: scalar|Param|null,
+ *     webhook_secret?: scalar|Param|null, // Default: null
+ *     routes?: bool|Param,
+ *     config?: array{
+ *         apiUrl?: scalar|Param|null, // Default: "https://api.telegram.org"
+ *         botId?: scalar|Param|null, // Default: null
+ *         botName?: scalar|Param|null, // Default: null
+ *         testEnv?: bool|Param, // Default: false
+ *         clientTimeout?: scalar|Param|null, // Default: 5
+ *         clientOptions?: array<mixed>,
+ *         localPathTransformer?: scalar|Param|null, // Default: null
+ *         pollingTimeout?: scalar|Param|null, // Default: 10
+ *         pollingLimit?: scalar|Param|null, // Default: 100
+ *         pollingAllowedUpdates?: array<mixed>,
+ *         enableHttp2?: bool|Param, // Default: true
+ *     },
+ * }
  * @psalm-type ConfigType = array{
  *     imports?: ImportsConfig,
  *     parameters?: ParametersConfig,
@@ -905,6 +923,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *     framework?: FrameworkConfig,
  *     doctrine?: DoctrineConfig,
  *     doctrine_migrations?: DoctrineMigrationsConfig,
+ *     nutgram?: NutgramConfig,
  *     "when@dev"?: array{
  *         imports?: ImportsConfig,
  *         parameters?: ParametersConfig,
@@ -912,6 +931,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         framework?: FrameworkConfig,
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         nutgram?: NutgramConfig,
  *     },
  *     "when@prod"?: array{
  *         imports?: ImportsConfig,
@@ -920,6 +940,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         framework?: FrameworkConfig,
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         nutgram?: NutgramConfig,
  *     },
  *     "when@test"?: array{
  *         imports?: ImportsConfig,
@@ -928,6 +949,7 @@ use Symfony\Component\Config\Loader\ParamConfigurator as Param;
  *         framework?: FrameworkConfig,
  *         doctrine?: DoctrineConfig,
  *         doctrine_migrations?: DoctrineMigrationsConfig,
+ *         nutgram?: NutgramConfig,
  *     },
  *     ...<string, ExtensionType|array{ // extra keys must follow the when@%env% pattern or match an extension alias
  *         imports?: ImportsConfig,
