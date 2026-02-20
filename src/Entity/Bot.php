@@ -17,6 +17,10 @@ class Bot
     #[ORM\Column(length: 255)]
     private ?string $tokenEncrypted = null;
 
+    #[ORM\ManyToOne(inversedBy: 'bots')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $owner = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -42,5 +46,17 @@ class Bot
     public function getToken(TokenEncryptionService $encryption): string
     {
         return $encryption->decrypt($this->tokenEncrypted);
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
     }
 }
