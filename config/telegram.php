@@ -4,9 +4,8 @@
 use SergiX44\Nutgram\Nutgram;
 
 use SergiX44\Nutgram\Conversations\Conversation;
+use App\Telegram\Command\StartCommand;
 
 Conversation::refreshOnDeserialize();
 
-$bot->onCommand('start', function (Nutgram $bot) {
-    return $bot->sendMessage('Hello, world!');
-})->description('The start command!');
+$bot->registerCommand( StartCommand::class );
