@@ -21,21 +21,26 @@ readonly class BotFactory
 
     public function create(User $owner, string $token): Bot
     {
-        $encryptedToken = $this->tokenEncryptionService->encrypt($token);
-        $bot = $this->em->getRepository(Bot::class)->findOneBy(['tokenEncrypted' => $encryptedToken]);
-        if ($bot) {
-            throw new BotAlreadyExistsException( "Bot with this token already exists");
-        }
-
         try {
             $testBot = new Nutgram($token);
-            $testBot->getMe();
+            $botData = $testBot->getMe();
         } catch (\Throwable $e) {
             throw new InvalidTokenException('Invalid token.');
         }
 
+        $userId = $botData->id;
+        $bot = $this->em->getRepository(Bot::class)->findOneBy(['telegramUserId' => $userId]);
+        if ($bot) {
+            if ($bot->isTrained()) {
+                throw new BotAlreadyExistsException("Bot with this token already exists");
+            }
+
+            return $bot;
+        }
+
         $bot = new Bot();
-        $bot->setTokenEncrypted($encryptedToken);
+        $bot->setTelegramUserId($userId);
+        $bot->setToken($token, $this->tokenEncryptionService);
         $bot->setOwner($owner);
         $this->em->persist($bot);
         $this->em->flush();

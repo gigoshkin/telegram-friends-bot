@@ -3,9 +3,11 @@
 namespace App\Telegram\Conversation;
 
 use App\Entity\Bot;
+use App\Entity\User;
 use App\Exception\Service\BotFactory\BotAlreadyExistsException;
 use App\Exception\Service\BotFactory\InvalidTokenException;
 use App\Exception\Service\ChatExportFileHandler\FileNotFoundException;
+use App\Exception\Service\ChatExportFileHandler\FileTooBigException;
 use App\Exception\Service\ChatExportFileHandler\InvalidMimeTypeException;
 use App\Message\ProcessChatExportMessage;
 use App\Service\BotFactory;
@@ -40,6 +42,7 @@ class AddBotConversation extends Conversation
     public function start(Nutgram $bot): void
     {
         $userId = $bot->userId();
+        $user = $this->userProvider->getOrCreate($userId);
 
         if ($bot->chat()->type !== ChatType::PRIVATE) {
             $bot->sendMessage($this->msgPrivateChatOnly());
@@ -47,7 +50,7 @@ class AddBotConversation extends Conversation
             return;
         }
 
-        if ($this->hasTrainingBot($userId)) {
+        if ($this->hasTrainingBot($user)) {
             $bot->sendMessage($this->msgAlreadyTraining());
             $this->end();
             return;
@@ -109,6 +112,11 @@ class AddBotConversation extends Conversation
         } catch (InvalidMimeTypeException) {
             $bot->sendMessage($this->msgInvalidFileType());
             return;
+        } catch (FileTooBigException)
+        {
+            // TODO: handle custom upload
+            $bot->sendMessage($this->msgFileTooBig());
+            return;
         }
 
         $bot->sendMessage($this->msgTrainingStarted());
@@ -128,11 +136,11 @@ class AddBotConversation extends Conversation
         $this->end();
     }
 
-    private function hasTrainingBot(int $userId): bool
+    private function hasTrainingBot(User $user): bool
     {
         $trainedBot = $this->em->getRepository(Bot::class)
             ->findOneBy([
-                'ownerId' => $userId,
+                'owner' => $user,
                 'isBeingTrained' => true
             ]);
 
@@ -224,5 +232,10 @@ class AddBotConversation extends Conversation
     private function msgTrainingFailed(): string
     {
         return "Could not process chat export file. Please try again later.";
+    }
+
+    private function msgFileTooBig(): string
+    {
+        return "File is too big. Please send a file smaller than 20 MB.";
     }
 }

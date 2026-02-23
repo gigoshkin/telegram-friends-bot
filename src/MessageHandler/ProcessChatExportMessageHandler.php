@@ -47,6 +47,7 @@ final readonly class ProcessChatExportMessageHandler
         $this->botTrainer->train($bot, $file);
 
         $bot->setIsBeingTrained(false);
+        $bot->setIsTrained(true);
         $this->em->flush();
 
         $this->notifyUser($bot, "✅ Your bot is trained and ready to use! Add it to a group chat to get started.");

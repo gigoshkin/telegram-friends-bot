@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\ChatExportFile;
 use App\Entity\User;
 use App\Exception\Service\ChatExportFileHandler\FileNotFoundException;
+use App\Exception\Service\ChatExportFileHandler\FileTooBigException;
 use App\Exception\Service\ChatExportFileHandler\InvalidMimeTypeException;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -42,9 +43,14 @@ readonly class ChatExportFileHandler
             throw new InvalidMimeTypeException('Only JSON files are supported.');
         }
 
-        $file = $this->bot->getFile($document->file_id);
-        if (!$file) {
-            throw new FileNotFoundException('File not found. ID: ' . $document->file_id);
+        try {
+            $file = $this->bot->getFile($document->file_id);
+        } catch (Throwable $e) {
+            if (stripos($e->getMessage(), 'file is too big') !== false) {
+                throw new FileTooBigException('File is too big.');
+            }
+
+            throw $e;
         }
 
         $path = $this->exportsDir . '/' . $file->file_id . '.json';
