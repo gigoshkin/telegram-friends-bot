@@ -21,6 +21,9 @@ class Bot
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
+    #[ORM\Column(options: ["default" => false])]
+    private bool $isBeingTrained = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -56,6 +59,18 @@ class Bot
     public function setOwner(?User $owner): static
     {
         $this->owner = $owner;
+
+        return $this;
+    }
+
+    public function isBeingTrained(): ?bool
+    {
+        return $this->isBeingTrained;
+    }
+
+    public function setIsBeingTrained(bool $isBeingTrained): static
+    {
+        $this->isBeingTrained = $isBeingTrained;
 
         return $this;
     }

@@ -26,9 +26,16 @@ class User
     #[ORM\OneToMany(targetEntity: Bot::class, mappedBy: 'owner', orphanRemoval: true)]
     private Collection $bots;
 
+    /**
+     * @var Collection<int, ChatExportFile>
+     */
+    #[ORM\OneToMany(targetEntity: ChatExportFile::class, mappedBy: 'owner', orphanRemoval: true)]
+    private Collection $chatExportFiles;
+
     public function __construct()
     {
         $this->bots = new ArrayCollection();
+        $this->chatExportFiles = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -72,6 +79,36 @@ class User
             // set the owning side to null (unless already changed)
             if ($bot->getOwner() === $this) {
                 $bot->setOwner(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChatExportFile>
+     */
+    public function getChatExportFiles(): Collection
+    {
+        return $this->chatExportFiles;
+    }
+
+    public function addChatExportFile(ChatExportFile $chatExportFile): static
+    {
+        if (!$this->chatExportFiles->contains($chatExportFile)) {
+            $this->chatExportFiles->add($chatExportFile);
+            $chatExportFile->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChatExportFile(ChatExportFile $chatExportFile): static
+    {
+        if ($this->chatExportFiles->removeElement($chatExportFile)) {
+            // set the owning side to null (unless already changed)
+            if ($chatExportFile->getOwner() === $this) {
+                $chatExportFile->setOwner(null);
             }
         }
 
