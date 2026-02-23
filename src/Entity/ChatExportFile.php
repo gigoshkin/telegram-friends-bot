@@ -4,10 +4,13 @@ namespace App\Entity;
 
 use App\Repository\ChatExportFileRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Gedmo\Timestampable\Traits\TimestampableEntity;
 
 #[ORM\Entity(repositoryClass: ChatExportFileRepository::class)]
 class ChatExportFile
 {
+    use TimestampableEntity;
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
