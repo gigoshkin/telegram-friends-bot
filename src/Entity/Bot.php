@@ -4,6 +4,8 @@ namespace App\Entity;
 
 use App\Repository\BotRepository;
 use App\Service\TokenEncryptionService;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Timestampable\Traits\TimestampableEntity;
@@ -34,6 +36,17 @@ class Bot
     #[ORM\Column(options: ["default" => false])]
     private ?bool $isTrained = false;
 
+    /**
+     * @var Collection<int, ChatExportUploadLink>
+     */
+    #[ORM\OneToMany(targetEntity: ChatExportUploadLink::class, mappedBy: 'bot', orphanRemoval: true)]
+    private Collection $chatExportUploadLinks;
+
+    public function __construct()
+    {
+        $this->chatExportUploadLinks = new ArrayCollection();
+    }
+
     public function getId(): ?int
     {
         return $this->id;
@@ -61,19 +74,19 @@ class Bot
         return $encryption->decrypt($this->tokenEncrypted);
     }
 
-    public function getOwner(): ?User
+    public function getOwner(): User
     {
         return $this->owner;
     }
 
-    public function setOwner(?User $owner): static
+    public function setOwner(User $owner): static
     {
         $this->owner = $owner;
 
         return $this;
     }
 
-    public function isBeingTrained(): ?bool
+    public function isBeingTrained(): bool
     {
         return $this->isBeingTrained;
     }
@@ -85,7 +98,7 @@ class Bot
         return $this;
     }
 
-    public function getTelegramUserId(): ?string
+    public function getTelegramUserId(): string
     {
         return $this->telegramUserId;
     }
@@ -105,6 +118,36 @@ class Bot
     public function setIsTrained(bool $isTrained): static
     {
         $this->isTrained = $isTrained;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, ChatExportUploadLink>
+     */
+    public function getChatExportUploadLinks(): Collection
+    {
+        return $this->chatExportUploadLinks;
+    }
+
+    public function addChatExportUploadLink(ChatExportUploadLink $chatExportUploadLink): static
+    {
+        if (!$this->chatExportUploadLinks->contains($chatExportUploadLink)) {
+            $this->chatExportUploadLinks->add($chatExportUploadLink);
+            $chatExportUploadLink->setBot($this);
+        }
+
+        return $this;
+    }
+
+    public function removeChatExportUploadLink(ChatExportUploadLink $chatExportUploadLink): static
+    {
+        if ($this->chatExportUploadLinks->removeElement($chatExportUploadLink)) {
+            // set the owning side to null (unless already changed)
+            if ($chatExportUploadLink->getBot() === $this) {
+                $chatExportUploadLink->setBot(null);
+            }
+        }
 
         return $this;
     }

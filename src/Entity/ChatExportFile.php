@@ -23,7 +23,7 @@ class ChatExportFile
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, nullable: true)]
     private ?string $telegramFileId = null;
 
     public function getId(): ?int
@@ -60,7 +60,7 @@ class ChatExportFile
         return $this->telegramFileId;
     }
 
-    public function setTelegramFileId(string $telegramFileId): static
+    public function setTelegramFileId(?string $telegramFileId): static
     {
         $this->telegramFileId = $telegramFileId;
 

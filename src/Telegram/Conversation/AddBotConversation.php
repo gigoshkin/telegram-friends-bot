@@ -105,7 +105,7 @@ class AddBotConversation extends Conversation
         }
 
         try {
-            $chatExportFile = $this->fileHandler->saveFile($user, $document);
+            $chatExportFile = $this->fileHandler->handleTelegramUpload($user, $document);
         } catch (FileNotFoundException) {
             $bot->sendMessage($this->msgFileNotFound());
             return;
@@ -114,8 +114,8 @@ class AddBotConversation extends Conversation
             return;
         } catch (FileTooBigException)
         {
-            // TODO: handle custom upload
-            $bot->sendMessage($this->msgFileTooBig());
+            $uploadUrl = $this->fileHandler->generateUploadLink($botEntity);
+            $bot->sendMessage($this->uploadLinkMessage($uploadUrl));
             return;
         }
 
@@ -237,5 +237,12 @@ class AddBotConversation extends Conversation
     private function msgFileTooBig(): string
     {
         return "File is too big. Please send a file smaller than 20 MB.";
+    }
+
+    private function uploadLinkMessage($uploadUrl): string
+    {
+        return "📁 Your file is too large for Telegram.\n\n" .
+            "Click here to upload via web instead:\n" .
+            $uploadUrl;
     }
 }
