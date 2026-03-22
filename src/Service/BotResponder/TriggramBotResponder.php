@@ -37,7 +37,7 @@ class TriggramBotResponder implements BotResponderInterface
             $queryText = $text;
         }
 
-        $minSimilarity = $this->dynamicMinSimilarity($queryText, $bot->getMinSimilarity());
+        $minSimilarity = $bot->getMinSimilarity();
 
         $matchLimit = $bot->getMatchLimit();
         $ftsWeight = $bot->getFtsWeight();
@@ -83,32 +83,6 @@ class TriggramBotResponder implements BotResponderInterface
         }
 
         return $pair['reply_text'];
-    }
-
-    /**
-     * Raises the similarity floor for short messages.
-     * "ok" or "yes" have so few trigrams that a 0.3 score matches almost anything —
-     * short messages need a stricter threshold, not a looser one.
-     * The configured $floor is always respected as the minimum possible value.
-     */
-    private function dynamicMinSimilarity(string $text, float $floor): float
-    {
-        $words = count(preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY));
-
-        // If the user explicitly disabled the floor (0.0), skip dynamic adjustment entirely.
-        if ($floor === 0.0) {
-            return 0.0;
-        }
-
-        $dynamic = match (true) {
-            $words <= 1 => 0.7,
-            $words <= 2 => 0.5,
-            $words <= 4 => 0.3,
-            $words <= 7 => 0.2,
-            default => $floor,
-        };
-
-        return max($floor, $dynamic);
     }
 
     /**

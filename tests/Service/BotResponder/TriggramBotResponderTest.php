@@ -116,57 +116,21 @@ class TriggramBotResponderTest extends TestCase
         $this->responder->respond($this->makeBot(), '@john');
     }
 
-    // ── Dynamic min similarity ────────────────────────────────────────────────
+    // ── Min similarity ────────────────────────────────────────────────────────
 
     #[Test]
-    #[DataProvider('dynamicSimilarityProvider')]
-    public function appliesDynamicMinSimilarityFloor(string $message, float $expectedMin): void
+    public function passesConfiguredMinSimilarityToRepository(): void
     {
         $bot = $this->makeBot();
-        $bot->setMinSimilarity(0.05); // very low configured floor
+        $bot->setMinSimilarity(0.35);
 
         $repo = $this->mockRepo();
         $repo->expects($this->once())
             ->method('findBestReplyPairs')
-            ->with(
-                $this->anything(),
-                $this->anything(),
-                $this->anything(),
-                $this->anything(),
-                $expectedMin,
-            )
+            ->with($this->anything(), $this->anything(), $this->anything(), $this->anything(), 0.35)
             ->willReturn([]);
 
-        $this->responder->respond($bot, $message);
-    }
-
-    public static function dynamicSimilarityProvider(): array
-    {
-        return [
-            '1 word → 0.7'              => ['ok', 0.7],
-            '2 words → 0.5'             => ['ok sure', 0.5],
-            '3 words → 0.3'             => ['are you coming', 0.3],
-            '4 words → 0.3'             => ['are you coming tonight', 0.3],
-            '5 words → 0.2'             => ['did you see that movie', 0.2],
-            '7 words → 0.2'             => ['did you see that movie last night', 0.2],
-            '8 words → configured floor' => ['did you see that movie last night please', 0.05],
-        ];
-    }
-
-    #[Test]
-    public function configuredFloorOverridesDynamicWhenHigher(): void
-    {
-        $bot = $this->makeBot();
-        $bot->setMinSimilarity(0.9); // very strict configured floor
-
-        // 1-word dynamic floor is 0.7, but configured is 0.9 → max(0.9, 0.7) = 0.9
-        $repo = $this->mockRepo();
-        $repo->expects($this->once())
-            ->method('findBestReplyPairs')
-            ->with($this->anything(), $this->anything(), $this->anything(), $this->anything(), 0.9)
-            ->willReturn([]);
-
-        $this->responder->respond($bot, 'ok');
+        $this->responder->respond($bot, 'any message');
     }
 
     // ── Response mode ─────────────────────────────────────────────────────────
