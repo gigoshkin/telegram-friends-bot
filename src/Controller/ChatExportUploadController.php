@@ -72,6 +72,7 @@ final class ChatExportUploadController extends AbstractController
             try {
                 $chatExportFile = $fileHandler->handleWebUpload($bot->getOwner(), $file);
 
+                $bot->setChatExportFile($chatExportFile);
                 $bot->setIsBeingTrained(true);
                 $upload->setResultedFile($chatExportFile);
                 $upload->setIsUsed(true);
@@ -83,7 +84,7 @@ final class ChatExportUploadController extends AbstractController
 
                 $this->notifyUser(
                     $bot->getOwner()->getTelegramId(),
-                    "⏳ Training your bot... This may take a few minutes. I'll let you know when it's ready!"
+                    "⏳ Processing your file... I'll let you know when it's ready!"
                 );
 
                 if ($request->isXmlHttpRequest()) {
