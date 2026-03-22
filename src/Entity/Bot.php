@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ResponseMode;
 use App\Repository\BotRepository;
 use App\Service\TokenEncryptionService;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -58,8 +59,17 @@ class Bot
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.5])]
     private float $directResponseProbability = 0.5;
 
+    #[ORM\Column(type: 'string', enumType: ResponseMode::class, options: ['default' => 'direct'])]
+    private ResponseMode $responseMode = ResponseMode::Direct;
+
+    #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.3])]
+    private float $sequentialWeight = 0.3;
+
     #[ORM\Column(options: ['default' => false])]
     private bool $debugMode = false;
+
+    #[ORM\Column(type: Types::INTEGER, options: ['default' => 5])]
+    private int $matchLimit = 5;
 
     /**
      * @var Collection<int, ChatExportUploadLink>
@@ -231,6 +241,30 @@ class Bot
         return $this;
     }
 
+    public function getResponseMode(): ResponseMode
+    {
+        return $this->responseMode;
+    }
+
+    public function setResponseMode(ResponseMode $responseMode): static
+    {
+        $this->responseMode = $responseMode;
+
+        return $this;
+    }
+
+    public function getSequentialWeight(): float
+    {
+        return $this->sequentialWeight;
+    }
+
+    public function setSequentialWeight(float $sequentialWeight): static
+    {
+        $this->sequentialWeight = max(0.0, min(1.0, $sequentialWeight));
+
+        return $this;
+    }
+
     public function isDebugMode(): bool
     {
         return $this->debugMode;
@@ -239,6 +273,18 @@ class Bot
     public function setDebugMode(bool $debugMode): static
     {
         $this->debugMode = $debugMode;
+
+        return $this;
+    }
+
+    public function getMatchLimit(): int
+    {
+        return $this->matchLimit;
+    }
+
+    public function setMatchLimit(int $matchLimit): static
+    {
+        $this->matchLimit = max(1, min(50, $matchLimit));
 
         return $this;
     }

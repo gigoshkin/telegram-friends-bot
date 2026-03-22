@@ -32,6 +32,19 @@ class BotConfigConversation extends Conversation
             'min'    => 0,
             'max'    => 100,
         ],
+        'sequentialWeight' => [
+            'label'  => 'Sequential pair weight',
+            'prompt' => 'Enter probability of picking a sequential pair over a direct reply pair (0–100):',
+            'min'    => 0,
+            'max'    => 100,
+        ],
+        'matchLimit' => [
+            'label'  => 'Match limit',
+            'prompt' => 'Enter number of top candidates to consider (1–50):',
+            'min'    => 1,
+            'max'    => 50,
+            'raw'    => true,
+        ],
     ];
 
     public function __construct(
@@ -66,10 +79,12 @@ class BotConfigConversation extends Conversation
         $this->field = $field;
 
         $meta    = self::$fields[$field];
-        $current = $this->currentPct($entity, $field);
+        $isRaw   = $meta['raw'] ?? false;
+        $current = $isRaw ? $this->currentRaw($entity, $field) : $this->currentPct($entity, $field);
+        $suffix  = $isRaw ? '' : '%';
 
         $bot->sendMessage(
-            "{$meta['prompt']}\nCurrent value: <b>{$current}%</b>",
+            "{$meta['prompt']}\nCurrent value: <b>{$current}{$suffix}</b>",
             parse_mode: 'HTML',
         );
 
@@ -101,16 +116,21 @@ class BotConfigConversation extends Conversation
             return;
         }
 
+        $isRaw = $meta['raw'] ?? false;
+
         match ($this->field) {
             'responseProbability'       => $entity->setResponseProbability($value / 100),
             'minSimilarity'             => $entity->setMinSimilarity($value / 100),
             'directResponseProbability' => $entity->setDirectResponseProbability($value / 100),
+            'sequentialWeight'          => $entity->setSequentialWeight($value / 100),
+            'matchLimit'                => $entity->setMatchLimit((int) $value),
         };
 
         $this->em->flush();
 
+        $suffix  = $isRaw ? '' : '%';
         $bot->sendMessage(
-            "✅ {$meta['label']} updated to <b>{$value}%</b>",
+            "✅ {$meta['label']} updated to <b>{$value}{$suffix}</b>",
             parse_mode: 'HTML',
             reply_markup: $this->detailHandler->buildKeyboard($entity),
         );
@@ -124,7 +144,16 @@ class BotConfigConversation extends Conversation
             'responseProbability'       => (int) round($entity->getResponseProbability() * 100),
             'minSimilarity'             => (int) round($entity->getMinSimilarity() * 100),
             'directResponseProbability' => (int) round($entity->getDirectResponseProbability() * 100),
+            'sequentialWeight'          => (int) round($entity->getSequentialWeight() * 100),
             default                     => 0,
+        };
+    }
+
+    private function currentRaw(Bot $entity, string $field): int
+    {
+        return match ($field) {
+            'matchLimit' => $entity->getMatchLimit(),
+            default      => 0,
         };
     }
 }

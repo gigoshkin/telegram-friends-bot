@@ -3,6 +3,7 @@
 namespace App\Service\BotResponder;
 
 use App\Entity\Bot;
+use App\Enum\ResponseMode;
 use App\Repository\ChatMessageRepository;
 
 class TriggramBotResponder implements BotResponderInterface
@@ -27,23 +28,66 @@ class TriggramBotResponder implements BotResponderInterface
             return null;
         }
 
-        $pairs = $this->chatMessageRepository->findBestReplyPairs(
-            $file,
-            $target,
-            trim($incomingMessage),
-            minSimilarity: $bot->getMinSimilarity(),
-        );
+        $text = trim($incomingMessage);
+        $minSimilarity = $bot->getMinSimilarity();
 
-        if (empty($pairs)) {
+        $matchLimit  = $bot->getMatchLimit();
+
+        $t0          = microtime(true);
+        $directPairs = $this->chatMessageRepository->findBestReplyPairs(
+            $file, $target, $text, limit: $matchLimit, minSimilarity: $minSimilarity,
+        );
+        $directMs    = (int) round((microtime(true) - $t0) * 1000);
+
+        $seqPairs = [];
+        $seqMs    = 0;
+        if ($bot->getResponseMode() === ResponseMode::Hybrid) {
+            $t1       = microtime(true);
+            $seqPairs = $this->chatMessageRepository->findSequentialPairs(
+                $file, $target, $text, limit: $matchLimit, minSimilarity: $minSimilarity,
+            );
+            $seqMs    = (int) round((microtime(true) - $t1) * 1000);
+        }
+
+        if (empty($directPairs) && empty($seqPairs)) {
             return null;
         }
 
-        $pair = $pairs[array_rand($pairs)];
+        $pair      = $this->selectPair($directPairs, $seqPairs, $bot->getSequentialWeight());
+        $isSeqPair = !in_array($pair, $directPairs, true);
 
         if ($bot->isDebugMode()) {
-            return "🔍 <i>" . htmlspecialchars($pair['trigger_text']) . "</i>\n↪️ " . $pair['reply_text'];
+            $source    = $isSeqPair ? 'sequential' : 'direct';
+            $score     = round((float) ($pair['score'] ?? 0), 2);
+            $timingStr = "direct: {$directMs}ms";
+            if ($bot->getResponseMode() === ResponseMode::Hybrid) {
+                $timingStr .= ", seq: {$seqMs}ms";
+            }
+            return "🔍 <i>" . htmlspecialchars($pair['trigger_text']) . "</i>\n"
+                . "↪️ " . $pair['reply_text'] . "\n"
+                . "<code>[{$source} · score: {$score} · {$timingStr}]</code>";
         }
 
         return $pair['reply_text'];
+    }
+
+    /**
+     * @param array<int, array{trigger_text: string, reply_text: string}> $directPairs
+     * @param array<int, array{trigger_text: string, reply_text: string}> $seqPairs
+     * @return array{trigger_text: string, reply_text: string}
+     */
+    private function selectPair(array $directPairs, array $seqPairs, float $seqWeight): array
+    {
+        $hasSeq    = !empty($seqPairs);
+        $hasDirect = !empty($directPairs);
+
+        if ($hasSeq && $hasDirect) {
+            $useSeq = (mt_rand() / mt_getrandmax()) < $seqWeight;
+            $pool   = $useSeq ? $seqPairs : $directPairs;
+        } else {
+            $pool = $hasDirect ? $directPairs : $seqPairs;
+        }
+
+        return $pool[array_rand($pool)];
     }
 }

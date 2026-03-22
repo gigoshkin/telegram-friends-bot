@@ -7,6 +7,7 @@ use App\Telegram\Conversation\AddBotConversation;
 use App\Telegram\Conversation\BotConfigConversation;
 use App\Telegram\Exception\QueryTooOldException;
 use App\Telegram\Handler\BotDebugToggleHandler;
+use App\Telegram\Handler\BotResponseModeHandler;
 use App\Telegram\Handler\BotDeleteConfirmHandler;
 use App\Telegram\Handler\BotDeleteHandler;
 use App\Telegram\Handler\BotDetailHandler;
@@ -50,5 +51,6 @@ $bot->onCallbackQueryData('bot_delete:.*', BotDeleteHandler::class);
 $bot->onCallbackQueryData('bot_delete_confirm:.*', BotDeleteConfirmHandler::class);
 $bot->onCallbackQueryData('bot_config:.*', BotConfigConversation::class);
 $bot->onCallbackQueryData('bot_debug_toggle:.*', BotDebugToggleHandler::class);
+$bot->onCallbackQueryData('bot_response_mode:.*', BotResponseModeHandler::class);
 
 $bot->onCallbackQueryData('select_target:.*', SelectTargetHandler::class);

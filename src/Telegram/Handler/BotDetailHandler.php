@@ -3,6 +3,7 @@
 namespace App\Telegram\Handler;
 
 use App\Entity\Bot;
+use App\Enum\ResponseMode;
 use App\Service\BotInfoService;
 use Doctrine\ORM\EntityManagerInterface;
 use SergiX44\Nutgram\Nutgram;
@@ -45,11 +46,13 @@ readonly class BotDetailHandler
         $probPct = (int) round($entity->getResponseProbability() * 100);
         $simPct  = (int) round($entity->getMinSimilarity() * 100);
 
-        $directPct = (int) round($entity->getDirectResponseProbability() * 100);
-        $status    = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
-        $debug     = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
+        $directPct  = (int) round($entity->getDirectResponseProbability() * 100);
+        $status     = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
+        $debug      = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
+        $mode       = $entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct';
+        $seqPct     = (int) round($entity->getSequentialWeight() * 100);
 
-        return implode("\n", [
+        $lines = [
             "<b>🤖 {$name}</b>",
             "Telegram ID: <code>{$entity->getTelegramUserId()}</code> · DB #{$entity->getId()}",
             "Status: {$status}",
@@ -58,8 +61,17 @@ readonly class BotDetailHandler
             "• Response probability: <b>{$probPct}%</b>",
             "• Min similarity (trigram): <b>{$simPct}%</b>",
             "• Direct reply probability: <b>{$directPct}%</b>",
-            "• Debug mode: <b>{$debug}</b>",
-        ]);
+            "• Response mode: <b>{$mode}</b>",
+        ];
+
+        if ($entity->getResponseMode() === ResponseMode::Hybrid) {
+            $lines[] = "• Sequential pair weight: <b>{$seqPct}%</b>";
+        }
+
+        $lines[] = "• Match limit: <b>{$entity->getMatchLimit()}</b>";
+        $lines[] = "• Debug mode: <b>{$debug}</b>";
+
+        return implode("\n", $lines);
     }
 
     public function buildKeyboard(Bot $entity): InlineKeyboardMarkup
@@ -68,9 +80,11 @@ readonly class BotDetailHandler
         $probPct    = (int) round($entity->getResponseProbability() * 100);
         $simPct     = (int) round($entity->getMinSimilarity() * 100);
         $directPct  = (int) round($entity->getDirectResponseProbability() * 100);
-        $debugLabel = '🐛 Debug mode: ' . ($entity->isDebugMode() ? 'ON' : 'OFF');
+        $seqPct     = (int) round($entity->getSequentialWeight() * 100);
+        $modeLabel  = '🔀 Mode: ' . ($entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct only');
+        $debugLabel = '🐛 Debug: ' . ($entity->isDebugMode() ? 'ON' : 'OFF');
 
-        return InlineKeyboardMarkup::make()
+        $keyboard = InlineKeyboardMarkup::make()
             ->addRow(
                 InlineKeyboardButton::make(
                     "📊 Response probability: {$probPct}%",
@@ -89,6 +103,27 @@ readonly class BotDetailHandler
                     callback_data: "bot_config:{$id}:directResponseProbability",
                 ),
             )
+            ->addRow(
+                InlineKeyboardButton::make($modeLabel, callback_data: "bot_response_mode:{$id}"),
+            );
+
+        if ($entity->getResponseMode() === ResponseMode::Hybrid) {
+            $keyboard->addRow(
+                InlineKeyboardButton::make(
+                    "⚖️ Sequential weight: {$seqPct}%",
+                    callback_data: "bot_config:{$id}:sequentialWeight",
+                ),
+            );
+        }
+
+        $keyboard->addRow(
+            InlineKeyboardButton::make(
+                "🔢 Match limit: {$entity->getMatchLimit()}",
+                callback_data: "bot_config:{$id}:matchLimit",
+            ),
+        );
+
+        return $keyboard
             ->addRow(
                 InlineKeyboardButton::make($debugLabel, callback_data: "bot_debug_toggle:{$id}"),
             )
