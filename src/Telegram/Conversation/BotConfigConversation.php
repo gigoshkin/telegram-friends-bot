@@ -15,18 +15,22 @@ class BotConfigConversation extends Conversation
 
     private static array $fields = [
         'responseProbability' => [
-            'label'   => 'Response probability',
-            'prompt'  => 'Enter response probability (0–100):',
-            'unit'    => '%',
-            'min'     => 0,
-            'max'     => 100,
+            'label'  => 'Response probability',
+            'prompt' => 'Enter response probability (0–100):',
+            'min'    => 0,
+            'max'    => 100,
         ],
         'minSimilarity' => [
-            'label'   => 'Min similarity (trigram)',
-            'prompt'  => 'Enter minimum trigram similarity (0–100):',
-            'unit'    => '%',
-            'min'     => 0,
-            'max'     => 100,
+            'label'  => 'Min similarity (trigram)',
+            'prompt' => 'Enter minimum trigram similarity (0–100):',
+            'min'    => 0,
+            'max'    => 100,
+        ],
+        'directResponseProbability' => [
+            'label'  => 'Direct reply probability',
+            'prompt' => 'Enter probability of replying directly to the message vs sending to chat (0–100):',
+            'min'    => 0,
+            'max'    => 100,
         ],
     ];
 
@@ -98,8 +102,9 @@ class BotConfigConversation extends Conversation
         }
 
         match ($this->field) {
-            'responseProbability' => $entity->setResponseProbability($value / 100),
-            'minSimilarity'       => $entity->setMinSimilarity($value / 100),
+            'responseProbability'       => $entity->setResponseProbability($value / 100),
+            'minSimilarity'             => $entity->setMinSimilarity($value / 100),
+            'directResponseProbability' => $entity->setDirectResponseProbability($value / 100),
         };
 
         $this->em->flush();
@@ -116,9 +121,10 @@ class BotConfigConversation extends Conversation
     private function currentPct(Bot $entity, string $field): int
     {
         return match ($field) {
-            'responseProbability' => (int) round($entity->getResponseProbability() * 100),
-            'minSimilarity'       => (int) round($entity->getMinSimilarity() * 100),
-            default               => 0,
+            'responseProbability'       => (int) round($entity->getResponseProbability() * 100),
+            'minSimilarity'             => (int) round($entity->getMinSimilarity() * 100),
+            'directResponseProbability' => (int) round($entity->getDirectResponseProbability() * 100),
+            default                     => 0,
         };
     }
 }

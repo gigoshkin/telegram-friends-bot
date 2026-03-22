@@ -55,6 +55,9 @@ class Bot
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.1])]
     private float $minSimilarity = 0.1;
 
+    #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.5])]
+    private float $directResponseProbability = 0.5;
+
     #[ORM\Column(options: ['default' => false])]
     private bool $debugMode = false;
 
@@ -212,6 +215,18 @@ class Bot
     public function setMinSimilarity(float $minSimilarity): static
     {
         $this->minSimilarity = max(0.0, min(1.0, $minSimilarity));
+
+        return $this;
+    }
+
+    public function getDirectResponseProbability(): float
+    {
+        return $this->directResponseProbability;
+    }
+
+    public function setDirectResponseProbability(float $directResponseProbability): static
+    {
+        $this->directResponseProbability = max(0.0, min(1.0, $directResponseProbability));
 
         return $this;
     }

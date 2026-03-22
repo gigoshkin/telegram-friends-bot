@@ -45,8 +45,9 @@ readonly class BotDetailHandler
         $probPct = (int) round($entity->getResponseProbability() * 100);
         $simPct  = (int) round($entity->getMinSimilarity() * 100);
 
-        $status = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
-        $debug  = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
+        $directPct = (int) round($entity->getDirectResponseProbability() * 100);
+        $status    = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
+        $debug     = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
 
         return implode("\n", [
             "<b>🤖 {$name}</b>",
@@ -56,16 +57,17 @@ readonly class BotDetailHandler
             '⚙️ <b>Configuration</b>',
             "• Response probability: <b>{$probPct}%</b>",
             "• Min similarity (trigram): <b>{$simPct}%</b>",
+            "• Direct reply probability: <b>{$directPct}%</b>",
             "• Debug mode: <b>{$debug}</b>",
         ]);
     }
 
     public function buildKeyboard(Bot $entity): InlineKeyboardMarkup
     {
-        $id      = $entity->getId();
-        $probPct = (int) round($entity->getResponseProbability() * 100);
-        $simPct  = (int) round($entity->getMinSimilarity() * 100);
-
+        $id         = $entity->getId();
+        $probPct    = (int) round($entity->getResponseProbability() * 100);
+        $simPct     = (int) round($entity->getMinSimilarity() * 100);
+        $directPct  = (int) round($entity->getDirectResponseProbability() * 100);
         $debugLabel = '🐛 Debug mode: ' . ($entity->isDebugMode() ? 'ON' : 'OFF');
 
         return InlineKeyboardMarkup::make()
@@ -79,6 +81,12 @@ readonly class BotDetailHandler
                 InlineKeyboardButton::make(
                     "🎯 Min similarity: {$simPct}%",
                     callback_data: "bot_config:{$id}:minSimilarity",
+                ),
+            )
+            ->addRow(
+                InlineKeyboardButton::make(
+                    "↩️ Direct reply probability: {$directPct}%",
+                    callback_data: "bot_config:{$id}:directResponseProbability",
                 ),
             )
             ->addRow(

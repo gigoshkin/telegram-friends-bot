@@ -38,6 +38,7 @@ class BotWebhookController extends AbstractController
 
         $messageText = $data['message']['text'] ?? null;
         $chatId      = $data['message']['chat']['id'] ?? null;
+        $messageId   = $data['message']['message_id'] ?? null;
 
         if (!$messageText || !$chatId) {
             return new Response('', Response::HTTP_OK);
@@ -47,12 +48,20 @@ class BotWebhookController extends AbstractController
             $reply = $this->responder->respond($bot, $messageText);
 
             if ($reply !== null) {
+                $replyToMessageId = null;
+                if ($messageId && $bot->getDirectResponseProbability() > 0) {
+                    if ((mt_rand() / mt_getrandmax()) <= $bot->getDirectResponseProbability()) {
+                        $replyToMessageId = $messageId;
+                    }
+                }
+
                 $token = $bot->getToken($this->encryption);
                 $nutgram = new Nutgram($token);
                 $nutgram->sendMessage(
                     $reply,
                     chat_id: $chatId,
                     parse_mode: $bot->isDebugMode() ? 'HTML' : null,
+                    reply_to_message_id: $replyToMessageId,
                 );
             }
         } catch (\Throwable $e) {
