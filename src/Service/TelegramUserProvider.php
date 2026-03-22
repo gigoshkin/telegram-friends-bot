@@ -17,8 +17,7 @@ readonly class TelegramUserProvider
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['telegramId' => $userId]);
 
-        if (!$user)
-        {
+        if (!$user) {
             $user = new User();
             $user->setTelegramId($userId);
             $this->em->persist($user);

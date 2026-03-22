@@ -15,18 +15,19 @@ readonly class BotDeleteConfirmHandler
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private TelegramUserProvider $userProvider,
-        private BotRepository $botRepository,
-        private BotInfoService $botInfoService,
-    ) {
+        private TelegramUserProvider   $userProvider,
+        private BotRepository          $botRepository,
+        private BotInfoService         $botInfoService,
+    )
+    {
     }
 
     public function __invoke(Nutgram $bot): void
     {
         $bot->answerCallbackQuery();
 
-        $data  = $bot->callbackQuery()?->data ?? '';
-        $botId = (int) explode(':', $data, 2)[1];
+        $data = $bot->callbackQuery()?->data ?? '';
+        $botId = (int)explode(':', $data, 2)[1];
 
         /** @var Bot|null $entity */
         $entity = $this->em->getRepository(Bot::class)->find($botId);

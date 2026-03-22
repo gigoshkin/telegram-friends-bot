@@ -19,10 +19,9 @@ class StartCommand extends Command
 
     public function handle(Nutgram $bot): void
     {
-		if ( $bot->chat()->type !== ChatType::PRIVATE )
-		{
-			$bot->sendMessage('To configure bots, message me in private chat.');
-		}
+        if ($bot->chat()->type !== ChatType::PRIVATE) {
+            $bot->sendMessage('To configure bots, message me in private chat.');
+        }
 
         $bot->sendMessage(
             "👋 Hi! I help you create fun AI clones of your friends in group chats!\n\n" .

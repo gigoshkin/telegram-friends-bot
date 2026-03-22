@@ -45,12 +45,13 @@ class ChatMessageRepository extends ServiceEntityRepository
      */
     public function findBestReplyPairs(
         ChatExportFile $file,
-        string $targetFromId,
-        string $incomingText,
-        int $limit = 5,
-        float $minSimilarity = 0.0,
-        float $ftsWeight = 0.0,
-    ): array {
+        string         $targetFromId,
+        string         $incomingText,
+        int            $limit = 5,
+        float          $minSimilarity = 0.0,
+        float          $ftsWeight = 0.0,
+    ): array
+    {
         $trgmWeight = 1.0 - $ftsWeight;
         $sql = <<<SQL
             SELECT
@@ -80,13 +81,13 @@ class ChatMessageRepository extends ServiceEntityRepository
         return $this->getEntityManager()
             ->getConnection()
             ->executeQuery($sql, [
-                'file_id'        => $file->getId(),
-                'from_id'        => $targetFromId,
-                'incoming'       => $incomingText,
-                'limit'          => $limit,
+                'file_id' => $file->getId(),
+                'from_id' => $targetFromId,
+                'incoming' => $incomingText,
+                'limit' => $limit,
                 'min_similarity' => $minSimilarity,
-                'trgm_weight'    => $trgmWeight,
-                'fts_weight'     => $ftsWeight,
+                'trgm_weight' => $trgmWeight,
+                'fts_weight' => $ftsWeight,
             ])
             ->fetchAllAssociative();
     }
@@ -100,12 +101,13 @@ class ChatMessageRepository extends ServiceEntityRepository
      */
     public function findSequentialPairs(
         ChatExportFile $file,
-        string $targetFromId,
-        string $incomingText,
-        int $limit = 5,
-        float $minSimilarity = 0.0,
-        float $ftsWeight = 0.0,
-    ): array {
+        string         $targetFromId,
+        string         $incomingText,
+        int            $limit = 5,
+        float          $minSimilarity = 0.0,
+        float          $ftsWeight = 0.0,
+    ): array
+    {
         // Start from trigger messages that are similar to the incoming text —
         // the GIN trigram index on `text` prunes this set cheaply.
         // Then join forward to find the target's next message within 1 minute.
@@ -142,13 +144,13 @@ class ChatMessageRepository extends ServiceEntityRepository
         return $this->getEntityManager()
             ->getConnection()
             ->executeQuery($sql, [
-                'file_id'        => $file->getId(),
-                'from_id'        => $targetFromId,
-                'incoming'       => $incomingText,
-                'limit'          => $limit,
+                'file_id' => $file->getId(),
+                'from_id' => $targetFromId,
+                'incoming' => $incomingText,
+                'limit' => $limit,
                 'min_similarity' => $minSimilarity,
-                'trgm_weight'    => $trgmWeight,
-                'fts_weight'     => $ftsWeight,
+                'trgm_weight' => $trgmWeight,
+                'fts_weight' => $ftsWeight,
             ])
             ->fetchAllAssociative();
     }

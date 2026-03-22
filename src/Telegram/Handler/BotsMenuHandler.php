@@ -13,9 +13,10 @@ readonly class BotsMenuHandler
 {
     public function __construct(
         private TelegramUserProvider $userProvider,
-        private BotRepository $botRepository,
-        private BotInfoService $botInfoService,
-    ) {
+        private BotRepository        $botRepository,
+        private BotInfoService       $botInfoService,
+    )
+    {
     }
 
     public function __invoke(Nutgram $bot): void

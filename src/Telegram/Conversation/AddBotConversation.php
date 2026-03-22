@@ -41,7 +41,8 @@ class AddBotConversation extends Conversation
         private readonly BotTrainerInterface    $botTrainer,
         private readonly BotWebhookRegistrar    $webhookRegistrar,
         private readonly LoggerInterface        $logger,
-    ) {
+    )
+    {
     }
 
     protected function getSerializableAttributes(): array
@@ -134,10 +135,10 @@ class AddBotConversation extends Conversation
         }
 
         if ($callbackData !== null && str_starts_with($callbackData, 'use_export:')) {
-            $fileId = (int) substr($callbackData, strlen('use_export:'));
+            $fileId = (int)substr($callbackData, strlen('use_export:'));
             $user = $this->userProvider->getOrCreate($bot->userId());
             $file = $this->em->getRepository(ChatExportFile::class)->findOneBy([
-                'id'    => $fileId,
+                'id' => $fileId,
                 'owner' => $user,
             ]);
 
@@ -243,7 +244,7 @@ class AddBotConversation extends Conversation
 
         [, $botId, $fromId] = $parts;
 
-        $botEntity = $this->em->find(Bot::class, (int) $botId);
+        $botEntity = $this->em->find(Bot::class, (int)$botId);
         if (!$botEntity) {
             $bot->answerCallbackQuery(text: 'Bot not found.');
             $this->end();
@@ -278,7 +279,7 @@ class AddBotConversation extends Conversation
         } catch (\Throwable $e) {
             $this->logger->error('Failed to register bot webhook', [
                 'bot_id' => $botEntity->getId(),
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
 
@@ -373,7 +374,7 @@ class AddBotConversation extends Conversation
 
         foreach ($exports as $export) {
             $label = $export->getChatName() ?? 'Unnamed chat';
-            $date  = $export->getCreatedAt()?->format('d M Y') ?? '';
+            $date = $export->getCreatedAt()?->format('d M Y') ?? '';
             $keyboard->addRow(
                 InlineKeyboardButton::make(
                     "📁 {$label} ({$date})",
@@ -398,8 +399,8 @@ class AddBotConversation extends Conversation
 
         foreach ($participants as $participant) {
             $shortId = substr(ltrim($participant['fromId'], 'user'), -4);
-            $count   = number_format((int) $participant['messageCount'], 0, '.', ' ');
-            $label   = "{$participant['sender']} · {$count} msgs · #{$shortId}";
+            $count = number_format((int)$participant['messageCount'], 0, '.', ' ');
+            $label = "{$participant['sender']} · {$count} msgs · #{$shortId}";
 
             $keyboard->addRow(
                 InlineKeyboardButton::make(

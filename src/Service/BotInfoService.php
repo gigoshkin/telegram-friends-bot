@@ -13,7 +13,8 @@ class BotInfoService
     public function __construct(
         private readonly TokenEncryptionService $encryption,
         private readonly EntityManagerInterface $em,
-    ) {
+    )
+    {
     }
 
     /**
@@ -23,7 +24,7 @@ class BotInfoService
     public function getDisplayName(Bot $bot): string
     {
         $cachedAt = $bot->getTelegramNameCachedAt();
-        $isStale  = $cachedAt === null
+        $isStale = $cachedAt === null
             || $cachedAt->getTimestamp() < time() - self::CACHE_SECONDS;
 
         if ($bot->getTelegramName() === null || $isStale) {
@@ -37,7 +38,7 @@ class BotInfoService
     {
         try {
             $nutgram = new Nutgram($bot->getToken($this->encryption));
-            $me      = $nutgram->getMe();
+            $me = $nutgram->getMe();
 
             $name = $me->first_name;
             if ($me->username) {

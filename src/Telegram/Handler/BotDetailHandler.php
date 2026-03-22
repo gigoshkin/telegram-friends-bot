@@ -14,16 +14,17 @@ readonly class BotDetailHandler
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private BotInfoService $botInfoService,
-    ) {
+        private BotInfoService         $botInfoService,
+    )
+    {
     }
 
     public function __invoke(Nutgram $bot): void
     {
         $bot->answerCallbackQuery();
 
-        $data  = $bot->callbackQuery()?->data ?? '';
-        $botId = (int) explode(':', $data, 2)[1];
+        $data = $bot->callbackQuery()?->data ?? '';
+        $botId = (int)explode(':', $data, 2)[1];
 
         /** @var Bot|null $entity */
         $entity = $this->em->getRepository(Bot::class)->find($botId);
@@ -42,15 +43,15 @@ readonly class BotDetailHandler
 
     public function buildText(Bot $entity): string
     {
-        $name    = $this->botInfoService->getDisplayName($entity);
-        $probPct = (int) round($entity->getResponseProbability() * 100);
-        $simPct  = (int) round($entity->getMinSimilarity() * 100);
+        $name = $this->botInfoService->getDisplayName($entity);
+        $probPct = (int)round($entity->getResponseProbability() * 100);
+        $simPct = (int)round($entity->getMinSimilarity() * 100);
 
-        $directPct  = (int) round($entity->getDirectResponseProbability() * 100);
-        $status     = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
-        $debug      = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
-        $mode       = $entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct';
-        $seqPct     = (int) round($entity->getSequentialWeight() * 100);
+        $directPct = (int)round($entity->getDirectResponseProbability() * 100);
+        $status = $entity->isTrained() ? '✅ Active' : '⏳ Setting up...';
+        $debug = $entity->isDebugMode() ? '🟢 ON' : '⚫ OFF';
+        $mode = $entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct';
+        $seqPct = (int)round($entity->getSequentialWeight() * 100);
 
         $lines = [
             "<b>🤖 {$name}</b>",
@@ -68,7 +69,7 @@ readonly class BotDetailHandler
             $lines[] = "• Sequential pair weight: <b>{$seqPct}%</b>";
         }
 
-        $ftsPct  = (int) round($entity->getFtsWeight() * 100);
+        $ftsPct = (int)round($entity->getFtsWeight() * 100);
         $lines[] = "• Match limit: <b>{$entity->getMatchLimit()}</b>";
         $lines[] = "• FTS weight: <b>{$ftsPct}%</b>";
         $lines[] = "• Debug mode: <b>{$debug}</b>";
@@ -78,12 +79,12 @@ readonly class BotDetailHandler
 
     public function buildKeyboard(Bot $entity): InlineKeyboardMarkup
     {
-        $id         = $entity->getId();
-        $probPct    = (int) round($entity->getResponseProbability() * 100);
-        $simPct     = (int) round($entity->getMinSimilarity() * 100);
-        $directPct  = (int) round($entity->getDirectResponseProbability() * 100);
-        $seqPct     = (int) round($entity->getSequentialWeight() * 100);
-        $modeLabel  = '🔀 Mode: ' . ($entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct only');
+        $id = $entity->getId();
+        $probPct = (int)round($entity->getResponseProbability() * 100);
+        $simPct = (int)round($entity->getMinSimilarity() * 100);
+        $directPct = (int)round($entity->getDirectResponseProbability() * 100);
+        $seqPct = (int)round($entity->getSequentialWeight() * 100);
+        $modeLabel = '🔀 Mode: ' . ($entity->getResponseMode() === ResponseMode::Hybrid ? 'Hybrid' : 'Direct only');
         $debugLabel = '🐛 Debug: ' . ($entity->isDebugMode() ? 'ON' : 'OFF');
 
         $keyboard = InlineKeyboardMarkup::make()
@@ -118,7 +119,7 @@ readonly class BotDetailHandler
             );
         }
 
-        $ftsPct = (int) round($entity->getFtsWeight() * 100);
+        $ftsPct = (int)round($entity->getFtsWeight() * 100);
 
         $keyboard->addRow(
             InlineKeyboardButton::make(

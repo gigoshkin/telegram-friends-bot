@@ -19,7 +19,8 @@ class BotWebhookController extends AbstractController
         private readonly BotResponderInterface  $responder,
         private readonly TokenEncryptionService $encryption,
         private readonly LoggerInterface        $logger,
-    ) {
+    )
+    {
     }
 
     #[Route('/bot-hook/{telegramUserId}', name: 'app_bot_webhook', methods: ['POST'])]
@@ -27,7 +28,7 @@ class BotWebhookController extends AbstractController
     {
         $bot = $this->botRepository->findOneBy([
             'telegramUserId' => $telegramUserId,
-            'isTrained'      => true,
+            'isTrained' => true,
         ]);
 
         if (!$bot) {
@@ -37,8 +38,8 @@ class BotWebhookController extends AbstractController
         $data = json_decode($request->getContent(), true);
 
         $messageText = $data['message']['text'] ?? null;
-        $chatId      = $data['message']['chat']['id'] ?? null;
-        $messageId   = $data['message']['message_id'] ?? null;
+        $chatId = $data['message']['chat']['id'] ?? null;
+        $messageId = $data['message']['message_id'] ?? null;
 
         if (!$messageText || !$chatId) {
             return new Response('', Response::HTTP_OK);
@@ -67,7 +68,7 @@ class BotWebhookController extends AbstractController
         } catch (\Throwable $e) {
             $this->logger->error('Bot webhook error', [
                 'telegram_user_id' => $telegramUserId,
-                'error'            => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
 

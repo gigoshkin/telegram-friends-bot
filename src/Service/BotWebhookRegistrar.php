@@ -13,7 +13,8 @@ readonly class BotWebhookRegistrar
         private TokenEncryptionService $encryption,
         private UrlGeneratorInterface  $urlGenerator,
         private LoggerInterface        $logger,
-    ) {
+    )
+    {
     }
 
     public function register(Bot $bot): void
@@ -32,8 +33,8 @@ readonly class BotWebhookRegistrar
         $nutgram->setWebhook($url);
 
         $this->logger->info('Webhook registered for bot', [
-            'bot_id'    => $bot->getId(),
-            'webhook'   => $url,
+            'bot_id' => $bot->getId(),
+            'webhook' => $url,
         ]);
     }
 }

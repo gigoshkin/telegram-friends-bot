@@ -25,8 +25,8 @@ readonly class ChatExportFileHandler
         private Nutgram                $bot,
         #[Autowire('%chat_exports_dir%')]
         private string                 $exportsDir,
-        private LoggerInterface       $logger,
-        private UrlGeneratorInterface $urlGenerator,
+        private LoggerInterface        $logger,
+        private UrlGeneratorInterface  $urlGenerator,
     )
     {
     }
@@ -72,8 +72,7 @@ readonly class ChatExportFileHandler
             throw new \RuntimeException('Could not download file from Telegram.');
         }
 
-        if (!$this->validateJsonFile($path))
-        {
+        if (!$this->validateJsonFile($path)) {
             throw new InvalidMimeTypeException('Invalid JSON file.');
         }
 
@@ -120,8 +119,7 @@ readonly class ChatExportFileHandler
             throw new \RuntimeException('Could not save uploaded file.');
         }
 
-        if (!$this->validateJsonFile($path))
-        {
+        if (!$this->validateJsonFile($path)) {
             @unlink($path);
             throw new InvalidMimeTypeException('Invalid JSON file.');
         }

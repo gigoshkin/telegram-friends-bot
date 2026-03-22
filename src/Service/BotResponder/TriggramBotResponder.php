@@ -10,12 +10,13 @@ class TriggramBotResponder implements BotResponderInterface
 {
     public function __construct(
         private readonly ChatMessageRepository $chatMessageRepository,
-    ) {
+    )
+    {
     }
 
     public function respond(Bot $bot, string $incomingMessage): ?string
     {
-        $file   = $bot->getChatExportFile();
+        $file = $bot->getChatExportFile();
         $target = $bot->getTargetFromId();
 
         if ($file === null || $target === null) {
@@ -28,7 +29,7 @@ class TriggramBotResponder implements BotResponderInterface
             return null;
         }
 
-        $text      = trim($incomingMessage);
+        $text = trim($incomingMessage);
         $queryText = trim(preg_replace('/@\w+\s*/u', '', $text));
         if ($queryText === '') {
             $queryText = $text;
@@ -37,34 +38,34 @@ class TriggramBotResponder implements BotResponderInterface
         $minSimilarity = $this->dynamicMinSimilarity($queryText, $bot->getMinSimilarity());
 
         $matchLimit = $bot->getMatchLimit();
-        $ftsWeight  = $bot->getFtsWeight();
+        $ftsWeight = $bot->getFtsWeight();
 
-        $t0          = microtime(true);
+        $t0 = microtime(true);
         $directPairs = $this->chatMessageRepository->findBestReplyPairs(
             $file, $target, $queryText, limit: $matchLimit, minSimilarity: $minSimilarity, ftsWeight: $ftsWeight,
         );
-        $directMs    = (int) round((microtime(true) - $t0) * 1000);
+        $directMs = (int)round((microtime(true) - $t0) * 1000);
 
         $seqPairs = [];
-        $seqMs    = 0;
+        $seqMs = 0;
         if ($bot->getResponseMode() === ResponseMode::Hybrid) {
-            $t1       = microtime(true);
+            $t1 = microtime(true);
             $seqPairs = $this->chatMessageRepository->findSequentialPairs(
                 $file, $target, $queryText, limit: $matchLimit, minSimilarity: $minSimilarity, ftsWeight: $ftsWeight,
             );
-            $seqMs    = (int) round((microtime(true) - $t1) * 1000);
+            $seqMs = (int)round((microtime(true) - $t1) * 1000);
         }
 
         if (empty($directPairs) && empty($seqPairs)) {
             return null;
         }
 
-        $pair      = $this->selectPair($directPairs, $seqPairs, $bot->getSequentialWeight());
+        $pair = $this->selectPair($directPairs, $seqPairs, $bot->getSequentialWeight());
         $isSeqPair = !in_array($pair, $directPairs, true);
 
         if ($bot->isDebugMode()) {
-            $source    = $isSeqPair ? 'sequential' : 'direct';
-            $score     = round((float) ($pair['score'] ?? 0), 2);
+            $source = $isSeqPair ? 'sequential' : 'direct';
+            $score = round((float)($pair['score'] ?? 0), 2);
             $timingStr = "direct: {$directMs}ms";
             if ($bot->getResponseMode() === ResponseMode::Hybrid) {
                 $timingStr .= ", seq: {$seqMs}ms";
@@ -93,7 +94,7 @@ class TriggramBotResponder implements BotResponderInterface
             $words <= 2 => 0.5,
             $words <= 4 => 0.3,
             $words <= 7 => 0.2,
-            default     => $floor,
+            default => $floor,
         };
 
         return max($floor, $dynamic);
@@ -106,12 +107,12 @@ class TriggramBotResponder implements BotResponderInterface
      */
     private function selectPair(array $directPairs, array $seqPairs, float $seqWeight): array
     {
-        $hasSeq    = !empty($seqPairs);
+        $hasSeq = !empty($seqPairs);
         $hasDirect = !empty($directPairs);
 
         if ($hasSeq && $hasDirect) {
             $useSeq = (mt_rand() / mt_getrandmax()) < $seqWeight;
-            $pool   = $useSeq ? $seqPairs : $directPairs;
+            $pool = $useSeq ? $seqPairs : $directPairs;
         } else {
             $pool = $hasDirect ? $directPairs : $seqPairs;
         }

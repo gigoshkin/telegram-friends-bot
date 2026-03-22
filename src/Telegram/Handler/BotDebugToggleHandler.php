@@ -10,21 +10,22 @@ readonly class BotDebugToggleHandler
 {
     public function __construct(
         private EntityManagerInterface $em,
-        private BotDetailHandler $detailHandler,
-    ) {
+        private BotDetailHandler       $detailHandler,
+    )
+    {
     }
 
     public function __invoke(Nutgram $bot): void
     {
         $bot->answerCallbackQuery();
 
-        $data  = $bot->callbackQuery()?->data ?? '';
-        $botId = (int) explode(':', $data, 2)[1];
+        $data = $bot->callbackQuery()?->data ?? '';
+        $botId = (int)explode(':', $data, 2)[1];
 
         /** @var Bot|null $entity */
         $entity = $this->em->getRepository(Bot::class)->find($botId);
 
-        if (!$entity || $entity->getOwner()->getTelegramId() !== (string) $bot->userId()) {
+        if (!$entity || $entity->getOwner()->getTelegramId() !== (string)$bot->userId()) {
             $bot->editMessageText('Bot not found.');
             return;
         }

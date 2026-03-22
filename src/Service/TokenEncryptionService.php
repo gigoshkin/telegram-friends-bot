@@ -11,7 +11,9 @@ class TokenEncryptionService
     public function __construct(
         #[Autowire('%env(BOT_TOKEN_ENCRYPTION_KEY)%')]
         private readonly string $key
-    ) {}
+    )
+    {
+    }
 
     public function encrypt(string $plaintext): string
     {

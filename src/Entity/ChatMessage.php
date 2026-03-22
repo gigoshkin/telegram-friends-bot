@@ -7,9 +7,9 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: ChatMessageRepository::class)]
-#[ORM\Index(columns: ['chat_export_file_id', 'from_id'], name: 'idx_from_id')]
-#[ORM\Index(columns: ['chat_export_file_id', 'telegram_message_id'], name: 'idx_telegram_msg_id')]
-#[ORM\Index(columns: ['chat_export_file_id', 'from_id', 'sent_at', 'telegram_message_id'], name: 'idx_sequential_lookup')]
+#[ORM\Index(name: 'idx_from_id', columns: ['chat_export_file_id', 'from_id'])]
+#[ORM\Index(name: 'idx_telegram_msg_id', columns: ['chat_export_file_id', 'telegram_message_id'])]
+#[ORM\Index(name: 'idx_sequential_lookup', columns: ['chat_export_file_id', 'from_id', 'sent_at', 'telegram_message_id'])]
 class ChatMessage
 {
     #[ORM\Id]

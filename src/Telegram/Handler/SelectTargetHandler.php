@@ -14,7 +14,8 @@ readonly class SelectTargetHandler
         private EntityManagerInterface $em,
         private BotTrainerInterface    $trainer,
         private BotWebhookRegistrar    $webhookRegistrar,
-    ) {
+    )
+    {
     }
 
     public function __invoke(Nutgram $bot): void
@@ -31,7 +32,7 @@ readonly class SelectTargetHandler
         [, $botId, $fromId] = $parts;
 
         /** @var Bot|null $entity */
-        $entity = $this->em->getRepository(Bot::class)->find((int) $botId);
+        $entity = $this->em->getRepository(Bot::class)->find((int)$botId);
         if (!$entity) {
             return;
         }

@@ -16,7 +16,8 @@ class TelegramJsonImporter implements ChatImporterInterface
     public function __construct(
         private readonly EntityManagerInterface $em,
         private readonly LoggerInterface        $logger,
-    ) {
+    )
+    {
     }
 
     public function import(ChatExportFile $file): void
@@ -28,10 +29,10 @@ class TelegramJsonImporter implements ChatImporterInterface
         }
 
         $chatName = $this->extractChatName($path);
-        $conn     = $this->em->getConnection();
-        $fileId   = $file->getId();
-        $count    = 0;
-        $batch    = [];
+        $conn = $this->em->getConnection();
+        $fileId = $file->getId();
+        $count = 0;
+        $batch = [];
 
         foreach (Items::fromFile($path, ['pointer' => '/messages', 'decoder' => new ExtJsonDecoder(true)]) as $message) {
             if (!is_array($message) || ($message['type'] ?? '') !== 'message') {
@@ -40,7 +41,7 @@ class TelegramJsonImporter implements ChatImporterInterface
 
             $fromId = $message['from_id'] ?? null;
             $sender = $message['from'] ?? null;
-            if (empty($fromId) || empty($sender) || !str_starts_with((string) $fromId, 'user')) {
+            if (empty($fromId) || empty($sender) || !str_starts_with((string)$fromId, 'user')) {
                 continue;
             }
 
@@ -50,13 +51,13 @@ class TelegramJsonImporter implements ChatImporterInterface
             }
 
             $batch[] = [
-                'telegram_message_id'          => (int) $telegramId,
-                'from_id'                      => (string) $fromId,
-                'sender'                       => (string) $sender,
-                'text'                         => $this->extractText($message['text'] ?? null),
-                'sent_at'                      => $this->parseDate($message['date_unixtime'] ?? $message['date'] ?? null),
+                'telegram_message_id' => (int)$telegramId,
+                'from_id' => (string)$fromId,
+                'sender' => (string)$sender,
+                'text' => $this->extractText($message['text'] ?? null),
+                'sent_at' => $this->parseDate($message['date_unixtime'] ?? $message['date'] ?? null),
                 'reply_to_telegram_message_id' => isset($message['reply_to_message_id'])
-                    ? (int) $message['reply_to_message_id']
+                    ? (int)$message['reply_to_message_id']
                     : null,
             ];
 
@@ -139,7 +140,7 @@ class TelegramJsonImporter implements ChatImporterInterface
                 if (is_string($part)) {
                     $parts[] = $part;
                 } elseif (is_array($part) && isset($part['text'])) {
-                    $parts[] = (string) $part['text'];
+                    $parts[] = (string)$part['text'];
                 }
             }
             $result = implode('', $parts);
@@ -156,7 +157,7 @@ class TelegramJsonImporter implements ChatImporterInterface
         }
 
         if (is_numeric($value)) {
-            return (new \DateTimeImmutable())->setTimestamp((int) $value);
+            return (new \DateTimeImmutable())->setTimestamp((int)$value);
         }
 
         if (is_string($value)) {

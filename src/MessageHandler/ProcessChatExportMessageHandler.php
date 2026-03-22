@@ -25,7 +25,8 @@ final readonly class ProcessChatExportMessageHandler
         private EntityManagerInterface $em,
         private Nutgram                $nutgram,
         private LoggerInterface        $logger,
-    ) {
+    )
+    {
     }
 
     public function __invoke(ProcessChatExportMessage $message): void
@@ -54,7 +55,7 @@ final readonly class ProcessChatExportMessageHandler
 
             // Re-fetch file after import (EM was cleared inside the importer)
             $file = $this->em->find(ChatExportFile::class, $message->getChatExportFileId());
-            $bot  = $this->em->find(Bot::class, $message->getBotId());
+            $bot = $this->em->find(Bot::class, $message->getBotId());
 
             $participants = $this->chatMessageRepository->findDistinctParticipants($file);
 
@@ -69,10 +70,10 @@ final readonly class ProcessChatExportMessageHandler
 
         } catch (Throwable $e) {
             $this->logger->error('Failed to process chat export', [
-                'bot_id'             => $message->getBotId(),
+                'bot_id' => $message->getBotId(),
                 'chat_export_file_id' => $message->getChatExportFileId(),
-                'error'              => $e->getMessage(),
-                'trace'              => $e->getTraceAsString(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             $this->cleanupAfterFailure($message, $e);
@@ -115,8 +116,8 @@ final readonly class ProcessChatExportMessageHandler
             // Cleanup itself failed — at minimum log both errors
             $this->logger->error('Cleanup after failed import also failed', [
                 'original_error' => $cause->getMessage(),
-                'cleanup_error'  => $cleanupException->getMessage(),
-                'bot_id'         => $message->getBotId(),
+                'cleanup_error' => $cleanupException->getMessage(),
+                'bot_id' => $message->getBotId(),
             ]);
         }
     }
@@ -148,7 +149,7 @@ final readonly class ProcessChatExportMessageHandler
     private function participantLabel(array $participant): string
     {
         $shortId = substr(ltrim($participant['fromId'], 'user'), -4);
-        $count   = number_format((int) $participant['messageCount'], 0, '.', ' ');
+        $count = number_format((int)$participant['messageCount'], 0, '.', ' ');
         return "{$participant['sender']} · {$count} msgs · #{$shortId}";
     }
 
@@ -163,7 +164,7 @@ final readonly class ProcessChatExportMessageHandler
         } catch (Throwable $e) {
             $this->logger->warning('Failed to notify user', [
                 'bot_id' => $bot->getId(),
-                'error'  => $e->getMessage(),
+                'error' => $e->getMessage(),
             ]);
         }
     }
