@@ -28,4 +28,10 @@ services:
         resource: '../src/Telegram'
 
     App\Service\BotTrainer\BotTrainerInterface:
-        alias: App\Service\BotTrainer\LevenshteinBotTrainer
+        alias: App\Service\BotTrainer\TriggramBotTrainer
+
+    App\Service\BotResponder\BotResponderInterface:
+        alias: App\Service\BotResponder\TriggramBotResponder
+
+    App\Service\ChatImporter\ChatImporterInterface:
+        alias: App\Service\ChatImporter\TelegramJsonImporter
