@@ -89,6 +89,11 @@ class TriggramBotResponder implements BotResponderInterface
     {
         $words = count(preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY));
 
+        // If the user explicitly disabled the floor (0.0), skip dynamic adjustment entirely.
+        if ($floor === 0.0) {
+            return 0.0;
+        }
+
         $dynamic = match (true) {
             $words <= 1 => 0.7,
             $words <= 2 => 0.5,
