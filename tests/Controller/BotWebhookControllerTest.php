@@ -6,6 +6,7 @@ use App\Controller\BotWebhookController;
 use App\Entity\Bot;
 use App\Entity\ChatExportFile;
 use App\Repository\BotRepository;
+use App\Service\BotInfoService;
 use App\Service\BotResponder\BotResponderInterface;
 use App\Service\TokenEncryptionService;
 use PHPUnit\Framework\Attributes\Test;
@@ -24,6 +25,7 @@ class BotWebhookControllerTest extends TestCase
             $repo ?? $this->createStub(BotRepository::class),
             $responder ?? $this->createStub(BotResponderInterface::class),
             $this->createStub(TokenEncryptionService::class),
+            $this->createStub(BotInfoService::class),
             new NullLogger(),
         );
     }
