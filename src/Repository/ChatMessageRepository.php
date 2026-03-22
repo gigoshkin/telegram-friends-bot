@@ -43,8 +43,13 @@ class ChatMessageRepository extends ServiceEntityRepository
      *
      * @return array<int, array{trigger_text: string, reply_text: string}>
      */
-    public function findBestReplyPairs(ChatExportFile $file, string $targetFromId, string $incomingText, int $limit = 5): array
-    {
+    public function findBestReplyPairs(
+        ChatExportFile $file,
+        string $targetFromId,
+        string $incomingText,
+        int $limit = 5,
+        float $minSimilarity = 0.0,
+    ): array {
         $sql = <<<SQL
             SELECT
                 original.text AS trigger_text,
@@ -53,11 +58,12 @@ class ChatMessageRepository extends ServiceEntityRepository
             JOIN chat_message original
                 ON  original.telegram_message_id    = reply.reply_to_telegram_message_id
                 AND original.chat_export_file_id    = :file_id
-            WHERE reply.chat_export_file_id         = :file_id
-              AND reply.from_id                     = :from_id
-              AND reply.text                        IS NOT NULL
-              AND original.text                     IS NOT NULL
+            WHERE reply.chat_export_file_id          = :file_id
+              AND reply.from_id                      = :from_id
+              AND reply.text                         IS NOT NULL
+              AND original.text                      IS NOT NULL
               AND reply.reply_to_telegram_message_id IS NOT NULL
+              AND similarity(lower(original.text), lower(:incoming)) >= :min_similarity
             ORDER BY similarity(lower(original.text), lower(:incoming)) DESC
             LIMIT :limit
         SQL;
@@ -65,10 +71,11 @@ class ChatMessageRepository extends ServiceEntityRepository
         return $this->getEntityManager()
             ->getConnection()
             ->executeQuery($sql, [
-                'file_id'  => $file->getId(),
-                'from_id'  => $targetFromId,
-                'incoming' => $incomingText,
-                'limit'    => $limit,
+                'file_id'        => $file->getId(),
+                'from_id'        => $targetFromId,
+                'incoming'       => $incomingText,
+                'limit'          => $limit,
+                'min_similarity' => $minSimilarity,
             ])
             ->fetchAllAssociative();
     }

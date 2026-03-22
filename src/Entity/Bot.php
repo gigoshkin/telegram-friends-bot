@@ -43,6 +43,21 @@ class Bot
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $targetFromId = null;
 
+    #[ORM\Column(length: 128, nullable: true)]
+    private ?string $telegramName = null;
+
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE, nullable: true)]
+    private ?\DateTimeImmutable $telegramNameCachedAt = null;
+
+    #[ORM\Column(type: Types::FLOAT, options: ['default' => 1.0])]
+    private float $responseProbability = 1.0;
+
+    #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.1])]
+    private float $minSimilarity = 0.1;
+
+    #[ORM\Column(options: ['default' => false])]
+    private bool $debugMode = false;
+
     /**
      * @var Collection<int, ChatExportUploadLink>
      */
@@ -149,6 +164,66 @@ class Bot
     public function setTargetFromId(string $targetFromId): static
     {
         $this->targetFromId = $targetFromId;
+
+        return $this;
+    }
+
+    public function getTelegramName(): ?string
+    {
+        return $this->telegramName;
+    }
+
+    public function setTelegramName(?string $telegramName): static
+    {
+        $this->telegramName = $telegramName;
+
+        return $this;
+    }
+
+    public function getTelegramNameCachedAt(): ?\DateTimeImmutable
+    {
+        return $this->telegramNameCachedAt;
+    }
+
+    public function setTelegramNameCachedAt(?\DateTimeImmutable $telegramNameCachedAt): static
+    {
+        $this->telegramNameCachedAt = $telegramNameCachedAt;
+
+        return $this;
+    }
+
+    public function getResponseProbability(): float
+    {
+        return $this->responseProbability;
+    }
+
+    public function setResponseProbability(float $responseProbability): static
+    {
+        $this->responseProbability = max(0.0, min(1.0, $responseProbability));
+
+        return $this;
+    }
+
+    public function getMinSimilarity(): float
+    {
+        return $this->minSimilarity;
+    }
+
+    public function setMinSimilarity(float $minSimilarity): static
+    {
+        $this->minSimilarity = max(0.0, min(1.0, $minSimilarity));
+
+        return $this;
+    }
+
+    public function isDebugMode(): bool
+    {
+        return $this->debugMode;
+    }
+
+    public function setDebugMode(bool $debugMode): static
+    {
+        $this->debugMode = $debugMode;
 
         return $this;
     }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Bot;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -16,28 +17,14 @@ class BotRepository extends ServiceEntityRepository
         parent::__construct($registry, Bot::class);
     }
 
-//    /**
-//     * @return Bot[] Returns an array of Bot objects
-//     */
-//    public function findByExampleField($value): array
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->orderBy('b.id', 'ASC')
-//            ->setMaxResults(10)
-//            ->getQuery()
-//            ->getResult()
-//        ;
-//    }
-
-//    public function findOneBySomeField($value): ?Bot
-//    {
-//        return $this->createQueryBuilder('b')
-//            ->andWhere('b.exampleField = :val')
-//            ->setParameter('val', $value)
-//            ->getQuery()
-//            ->getOneOrNullResult()
-//        ;
-//    }
+    /** @return Bot[] */
+    public function findByOwner(User $owner): array
+    {
+        return $this->createQueryBuilder('b')
+            ->where('b.owner = :owner')
+            ->setParameter('owner', $owner)
+            ->orderBy('b.id', 'DESC')
+            ->getQuery()
+            ->getResult();
+    }
 }

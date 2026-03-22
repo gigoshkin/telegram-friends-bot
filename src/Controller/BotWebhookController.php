@@ -49,7 +49,11 @@ class BotWebhookController extends AbstractController
             if ($reply !== null) {
                 $token = $bot->getToken($this->encryption);
                 $nutgram = new Nutgram($token);
-                $nutgram->sendMessage($reply, chat_id: $chatId);
+                $nutgram->sendMessage(
+                    $reply,
+                    chat_id: $chatId,
+                    parse_mode: $bot->isDebugMode() ? 'HTML' : null,
+                );
             }
         } catch (\Throwable $e) {
             $this->logger->error('Bot webhook error', [

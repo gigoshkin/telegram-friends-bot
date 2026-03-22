@@ -31,9 +31,9 @@ class StartCommand extends Command
             "2. Add it to a group chat\n" .
             "3. Watch me impersonate them 🎭\n\n" .
             "Press the button below to get started 👇",
-            reply_markup: InlineKeyboardMarkup::make()->addRow(
-                InlineKeyboardButton::make('🤖 Add Bot', callback_data: 'add_bot')
-            )
+            reply_markup: InlineKeyboardMarkup::make()
+                ->addRow(InlineKeyboardButton::make('🤖 Add Bot', callback_data: 'add_bot'))
+                ->addRow(InlineKeyboardButton::make('📋 My Bots', callback_data: 'bots_menu'))
         );
     }
 }
