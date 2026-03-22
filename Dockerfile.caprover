@@ -112,7 +112,7 @@ COPY --chmod=755 docker/caprover/entrypoint.sh /caprover-entrypoint.sh
 EXPOSE 80
 
 HEALTHCHECK --interval=15s --timeout=5s --start-period=60s --retries=5 \
-    CMD curl -f http://localhost:80/ || exit 1
+    CMD curl -s http://localhost:80/ || exit 1
 
 ENTRYPOINT ["/caprover-entrypoint.sh"]
 CMD ["supervisord", "-c", "/etc/supervisor/supervisord.conf"]
