@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../vendor/symfony/dependency-injection/Loader/schema/services.schema.json
 # see https://symfony.com/doc/current/reference/configuration/framework.html
 framework:
     secret: '%env(APP_SECRET)%'
@@ -7,6 +8,18 @@ framework:
 
     #esi: true
     #fragments: true
+
+    csrf_protection: true
+
+    form:
+        csrf_protection:
+            enabled: true
+
+    rate_limiter:
+        file_upload:
+            policy: 'sliding_window'
+            limit: 100
+            interval: '60 minutes'
 
 when@test:
     framework:

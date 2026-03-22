@@ -1,0 +1,49 @@
+{% extends 'base.html.twig' %}
+
+
+{% block body %}
+    <div class="upload-container">
+        <h1>Upload Chat Export</h1>
+        <p class="subtitle">Upload your Telegram export to train the bot</p>
+
+        <div class="bot-info">
+            <strong>Bot:</strong>
+            {#  TODO: botname #}
+            <span>{{ bot.name ?? 'Your Bot' }}</span>
+        </div>
+
+        {% for message in app.flashes('error') %}
+            <div class="alert alert-error">{{ message }}</div>
+        {% endfor %}
+
+        {% for message in app.flashes('success') %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+
+        {{ form_start(form, {
+            'attr': {
+                'data-controller': 'upload-progress',
+                'data-action': 'submit->upload-progress#submit'
+            }
+        }) }}
+        <div class="form-group">
+            {{ form_label(form.file) }}
+            {{ form_widget(form.file) }}
+            {{ form_errors(form.file) }}
+            <div class="help-text">JSON only, max 100MB</div>
+        </div>
+
+        <div class="progress-container" data-upload-progress-target="container">
+            <div class="progress-label">
+                <span>Uploading...</span>
+                <span><span data-upload-progress-target="percent">0</span>%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" data-upload-progress-target="bar"></div>
+            </div>
+        </div>
+
+        {{ form_widget(form.submit) }}
+        {{ form_end(form) }}
+    </div>
+{% endblock %}

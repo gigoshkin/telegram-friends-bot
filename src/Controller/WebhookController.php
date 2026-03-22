@@ -12,8 +12,8 @@ final class WebhookController extends AbstractController
     #[Route('/hook', name: 'app_webhook')]
     public function index(Nutgram $bot): Response
     {
-		$bot->run();
+        $bot->run();
 
-		return new Response();
+        return new Response();
     }
 }
