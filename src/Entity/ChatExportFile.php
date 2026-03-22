@@ -26,6 +26,12 @@ class ChatExportFile
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $telegramFileId = null;
 
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isImported = false;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $chatName = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -63,6 +69,30 @@ class ChatExportFile
     public function setTelegramFileId(?string $telegramFileId): static
     {
         $this->telegramFileId = $telegramFileId;
+
+        return $this;
+    }
+
+    public function isImported(): bool
+    {
+        return $this->isImported;
+    }
+
+    public function setIsImported(bool $isImported): static
+    {
+        $this->isImported = $isImported;
+
+        return $this;
+    }
+
+    public function getChatName(): ?string
+    {
+        return $this->chatName;
+    }
+
+    public function setChatName(?string $chatName): static
+    {
+        $this->chatName = $chatName;
 
         return $this;
     }

@@ -18,7 +18,7 @@ framework:
     rate_limiter:
         file_upload:
             policy: 'sliding_window'
-            limit: 5
+            limit: 100
             interval: '60 minutes'
 
 when@test:

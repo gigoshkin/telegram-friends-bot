@@ -36,6 +36,13 @@ class Bot
     #[ORM\Column(options: ["default" => false])]
     private ?bool $isTrained = false;
 
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?ChatExportFile $chatExportFile = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $targetFromId = null;
+
     /**
      * @var Collection<int, ChatExportUploadLink>
      */
@@ -122,6 +129,30 @@ class Bot
         return $this;
     }
 
+    public function getChatExportFile(): ?ChatExportFile
+    {
+        return $this->chatExportFile;
+    }
+
+    public function setChatExportFile(?ChatExportFile $chatExportFile): static
+    {
+        $this->chatExportFile = $chatExportFile;
+
+        return $this;
+    }
+
+    public function getTargetFromId(): ?string
+    {
+        return $this->targetFromId;
+    }
+
+    public function setTargetFromId(string $targetFromId): static
+    {
+        $this->targetFromId = $targetFromId;
+
+        return $this;
+    }
+
     /**
      * @return Collection<int, ChatExportUploadLink>
      */
@@ -143,7 +174,6 @@ class Bot
     public function removeChatExportUploadLink(ChatExportUploadLink $chatExportUploadLink): static
     {
         if ($this->chatExportUploadLinks->removeElement($chatExportUploadLink)) {
-            // set the owning side to null (unless already changed)
             if ($chatExportUploadLink->getBot() === $this) {
                 $chatExportUploadLink->setBot(null);
             }

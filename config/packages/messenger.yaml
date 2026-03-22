@@ -9,8 +9,7 @@ framework:
             async: '%env(MESSENGER_TRANSPORT_DSN)%'
 
         routing:
-        # Route your messages to the transports
-        # 'App\Message\YourMessage': async
+            App\Message\ProcessChatExportMessage: async
 
 # when@test:
 #    framework:

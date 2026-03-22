@@ -13,6 +13,7 @@
         "doctrine/doctrine-bundle": "^3.2",
         "doctrine/doctrine-migrations-bundle": "^4.0",
         "doctrine/orm": "^3.6",
+        "halaxa/json-machine": "^1.2",
         "nutgram/symfony-bundle": "^1.1",
         "stof/doctrine-extensions-bundle": "^1.15",
         "symfony/asset": "7.4.*",

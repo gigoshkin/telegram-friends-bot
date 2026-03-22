@@ -9,9 +9,8 @@ final readonly class ProcessChatExportMessage
 {
     public function __construct(
         private int $chatExportFileId,
-        private int $botId
-    )
-    {
+        private int $botId,
+    ) {
     }
 
     public function getChatExportFileId(): int
