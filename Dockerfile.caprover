@@ -90,12 +90,16 @@ FROM frankenphp_prod AS caprover
 USER root
 
 # Install PostgreSQL 16, Redis, supervisord, curl (for healthcheck)
+# Add PostgreSQL official apt repository (postgresql-16 not in default Debian sources)
 # hadolint ignore=DL3008
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends gnupg2 curl ca-certificates lsb-release \
+    && curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | gpg --dearmor -o /usr/share/keyrings/postgresql.gpg \
+    && echo "deb [signed-by=/usr/share/keyrings/postgresql.gpg] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" \
+        > /etc/apt/sources.list.d/pgdg.list \
+    && apt-get update && apt-get install -y --no-install-recommends \
         postgresql-16 \
         redis-server \
         supervisor \
-        curl \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /var/lib/redis \
     && chown redis:redis /var/lib/redis
