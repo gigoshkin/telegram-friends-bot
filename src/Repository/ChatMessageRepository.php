@@ -49,12 +49,20 @@ class ChatMessageRepository extends ServiceEntityRepository
         string $incomingText,
         int $limit = 5,
         float $minSimilarity = 0.0,
+        float $ftsWeight = 0.0,
     ): array {
+        $trgmWeight = 1.0 - $ftsWeight;
         $sql = <<<SQL
             SELECT
-                original.text                                          AS trigger_text,
-                reply.text                                             AS reply_text,
-                similarity(lower(original.text), lower(:incoming))     AS score
+                original.text AS trigger_text,
+                reply.text    AS reply_text,
+                (
+                    :trgm_weight * similarity(lower(regexp_replace(original.text, '@\w+\s*', '', 'g')), lower(:incoming))
+                  + :fts_weight  * ts_rank(
+                        to_tsvector('simple', regexp_replace(original.text, '@\w+\s*', '', 'g')),
+                        plainto_tsquery('simple', :incoming)
+                    )
+                ) AS score
             FROM chat_message reply
             JOIN chat_message original
                 ON  original.telegram_message_id    = reply.reply_to_telegram_message_id
@@ -64,7 +72,7 @@ class ChatMessageRepository extends ServiceEntityRepository
               AND reply.text                         IS NOT NULL
               AND original.text                      IS NOT NULL
               AND reply.reply_to_telegram_message_id IS NOT NULL
-              AND similarity(lower(original.text), lower(:incoming)) >= :min_similarity
+              AND similarity(lower(regexp_replace(original.text, '@\w+\s*', '', 'g')), lower(:incoming)) >= :min_similarity
             ORDER BY score DESC
             LIMIT :limit
         SQL;
@@ -77,6 +85,8 @@ class ChatMessageRepository extends ServiceEntityRepository
                 'incoming'       => $incomingText,
                 'limit'          => $limit,
                 'min_similarity' => $minSimilarity,
+                'trgm_weight'    => $trgmWeight,
+                'fts_weight'     => $ftsWeight,
             ])
             ->fetchAllAssociative();
     }
@@ -94,16 +104,24 @@ class ChatMessageRepository extends ServiceEntityRepository
         string $incomingText,
         int $limit = 5,
         float $minSimilarity = 0.0,
+        float $ftsWeight = 0.0,
     ): array {
         // Start from trigger messages that are similar to the incoming text —
         // the GIN trigram index on `text` prunes this set cheaply.
         // Then join forward to find the target's next message within 1 minute.
         // This is O(similar_triggers) rather than O(target_messages).
+        $trgmWeight = 1.0 - $ftsWeight;
         $sql = <<<SQL
             SELECT
-                trigger_msg.text                                          AS trigger_text,
-                response.text                                             AS reply_text,
-                similarity(lower(trigger_msg.text), lower(:incoming))     AS score
+                trigger_msg.text AS trigger_text,
+                response.text    AS reply_text,
+                (
+                    :trgm_weight * similarity(lower(regexp_replace(trigger_msg.text, '@\w+\s*', '', 'g')), lower(:incoming))
+                  + :fts_weight  * ts_rank(
+                        to_tsvector('simple', regexp_replace(trigger_msg.text, '@\w+\s*', '', 'g')),
+                        plainto_tsquery('simple', :incoming)
+                    )
+                ) AS score
             FROM chat_message trigger_msg
             JOIN chat_message response
                 ON  response.chat_export_file_id           = :file_id
@@ -116,8 +134,8 @@ class ChatMessageRepository extends ServiceEntityRepository
             WHERE trigger_msg.chat_export_file_id = :file_id
               AND trigger_msg.from_id             != :from_id
               AND trigger_msg.text                IS NOT NULL
-              AND similarity(lower(trigger_msg.text), lower(:incoming)) >= :min_similarity
-            ORDER BY similarity(lower(trigger_msg.text), lower(:incoming)) DESC
+              AND similarity(lower(regexp_replace(trigger_msg.text, '@\w+\s*', '', 'g')), lower(:incoming)) >= :min_similarity
+            ORDER BY score DESC
             LIMIT :limit
         SQL;
 
@@ -129,6 +147,8 @@ class ChatMessageRepository extends ServiceEntityRepository
                 'incoming'       => $incomingText,
                 'limit'          => $limit,
                 'min_similarity' => $minSimilarity,
+                'trgm_weight'    => $trgmWeight,
+                'fts_weight'     => $ftsWeight,
             ])
             ->fetchAllAssociative();
     }

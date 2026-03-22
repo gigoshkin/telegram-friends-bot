@@ -71,6 +71,9 @@ class Bot
     #[ORM\Column(type: Types::INTEGER, options: ['default' => 5])]
     private int $matchLimit = 5;
 
+    #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.0])]
+    private float $ftsWeight = 0.0;
+
     /**
      * @var Collection<int, ChatExportUploadLink>
      */
@@ -285,6 +288,18 @@ class Bot
     public function setMatchLimit(int $matchLimit): static
     {
         $this->matchLimit = max(1, min(50, $matchLimit));
+
+        return $this;
+    }
+
+    public function getFtsWeight(): float
+    {
+        return $this->ftsWeight;
+    }
+
+    public function setFtsWeight(float $ftsWeight): static
+    {
+        $this->ftsWeight = max(0.0, min(1.0, $ftsWeight));
 
         return $this;
     }

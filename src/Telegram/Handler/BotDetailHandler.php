@@ -68,7 +68,9 @@ readonly class BotDetailHandler
             $lines[] = "• Sequential pair weight: <b>{$seqPct}%</b>";
         }
 
+        $ftsPct  = (int) round($entity->getFtsWeight() * 100);
         $lines[] = "• Match limit: <b>{$entity->getMatchLimit()}</b>";
+        $lines[] = "• FTS weight: <b>{$ftsPct}%</b>";
         $lines[] = "• Debug mode: <b>{$debug}</b>";
 
         return implode("\n", $lines);
@@ -116,10 +118,17 @@ readonly class BotDetailHandler
             );
         }
 
+        $ftsPct = (int) round($entity->getFtsWeight() * 100);
+
         $keyboard->addRow(
             InlineKeyboardButton::make(
                 "🔢 Match limit: {$entity->getMatchLimit()}",
                 callback_data: "bot_config:{$id}:matchLimit",
+            ),
+        )->addRow(
+            InlineKeyboardButton::make(
+                "🔤 FTS weight: {$ftsPct}%",
+                callback_data: "bot_config:{$id}:ftsWeight",
             ),
         );
 

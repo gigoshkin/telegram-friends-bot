@@ -28,14 +28,20 @@ class TriggramBotResponder implements BotResponderInterface
             return null;
         }
 
-        $text = trim($incomingMessage);
-        $minSimilarity = $bot->getMinSimilarity();
+        $text      = trim($incomingMessage);
+        $queryText = trim(preg_replace('/@\w+\s*/u', '', $text));
+        if ($queryText === '') {
+            $queryText = $text;
+        }
 
-        $matchLimit  = $bot->getMatchLimit();
+        $minSimilarity = $this->dynamicMinSimilarity($queryText, $bot->getMinSimilarity());
+
+        $matchLimit = $bot->getMatchLimit();
+        $ftsWeight  = $bot->getFtsWeight();
 
         $t0          = microtime(true);
         $directPairs = $this->chatMessageRepository->findBestReplyPairs(
-            $file, $target, $text, limit: $matchLimit, minSimilarity: $minSimilarity,
+            $file, $target, $queryText, limit: $matchLimit, minSimilarity: $minSimilarity, ftsWeight: $ftsWeight,
         );
         $directMs    = (int) round((microtime(true) - $t0) * 1000);
 
@@ -44,7 +50,7 @@ class TriggramBotResponder implements BotResponderInterface
         if ($bot->getResponseMode() === ResponseMode::Hybrid) {
             $t1       = microtime(true);
             $seqPairs = $this->chatMessageRepository->findSequentialPairs(
-                $file, $target, $text, limit: $matchLimit, minSimilarity: $minSimilarity,
+                $file, $target, $queryText, limit: $matchLimit, minSimilarity: $minSimilarity, ftsWeight: $ftsWeight,
             );
             $seqMs    = (int) round((microtime(true) - $t1) * 1000);
         }
@@ -63,12 +69,34 @@ class TriggramBotResponder implements BotResponderInterface
             if ($bot->getResponseMode() === ResponseMode::Hybrid) {
                 $timingStr .= ", seq: {$seqMs}ms";
             }
+            $minStr = round($minSimilarity, 2);
             return "🔍 <i>" . htmlspecialchars($pair['trigger_text']) . "</i>\n"
                 . "↪️ " . $pair['reply_text'] . "\n"
-                . "<code>[{$source} · score: {$score} · {$timingStr}]</code>";
+                . "<code>[{$source} · score: {$score} · min: {$minStr} · {$timingStr}]</code>";
         }
 
         return $pair['reply_text'];
+    }
+
+    /**
+     * Raises the similarity floor for short messages.
+     * "ok" or "yes" have so few trigrams that a 0.3 score matches almost anything —
+     * short messages need a stricter threshold, not a looser one.
+     * The configured $floor is always respected as the minimum possible value.
+     */
+    private function dynamicMinSimilarity(string $text, float $floor): float
+    {
+        $words = count(preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY));
+
+        $dynamic = match (true) {
+            $words <= 1 => 0.7,
+            $words <= 2 => 0.5,
+            $words <= 4 => 0.3,
+            $words <= 7 => 0.2,
+            default     => $floor,
+        };
+
+        return max($floor, $dynamic);
     }
 
     /**

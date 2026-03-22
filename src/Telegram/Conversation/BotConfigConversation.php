@@ -45,6 +45,12 @@ class BotConfigConversation extends Conversation
             'max'    => 50,
             'raw'    => true,
         ],
+        'ftsWeight' => [
+            'label'  => 'FTS weight',
+            'prompt' => "Enter full-text search weight (0–100).\n0 = trigram only, 100 = FTS only, 40 = recommended blend:",
+            'min'    => 0,
+            'max'    => 100,
+        ],
     ];
 
     public function __construct(
@@ -124,6 +130,7 @@ class BotConfigConversation extends Conversation
             'directResponseProbability' => $entity->setDirectResponseProbability($value / 100),
             'sequentialWeight'          => $entity->setSequentialWeight($value / 100),
             'matchLimit'                => $entity->setMatchLimit((int) $value),
+            'ftsWeight'                 => $entity->setFtsWeight($value / 100),
         };
 
         $this->em->flush();
@@ -145,6 +152,7 @@ class BotConfigConversation extends Conversation
             'minSimilarity'             => (int) round($entity->getMinSimilarity() * 100),
             'directResponseProbability' => (int) round($entity->getDirectResponseProbability() * 100),
             'sequentialWeight'          => (int) round($entity->getSequentialWeight() * 100),
+            'ftsWeight'                 => (int) round($entity->getFtsWeight() * 100),
             default                     => 0,
         };
     }
