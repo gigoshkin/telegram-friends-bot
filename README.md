@@ -1,5 +1,11 @@
 # Telegram Friends Bot
 
+[![CI](https://github.com/gigoshkin/telegram-friends-bot/actions/workflows/deploy.yml/badge.svg)](https://github.com/gigoshkin/telegram-friends-bot/actions/workflows/deploy.yml)
+[![PHP](https://img.shields.io/badge/PHP-8.4-777BB4?logo=php&logoColor=white)](https://www.php.net)
+[![Symfony](https://img.shields.io/badge/Symfony-7.4-000000?logo=symfony&logoColor=white)](https://symfony.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A self-hosted Telegram bot that lets you create AI clones of your friends. Train each clone on exported chat history, add it to a group, and watch it imitate whoever you want — complete with their vocabulary, phrasing, and response patterns.
 
 ---

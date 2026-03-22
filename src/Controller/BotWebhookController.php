@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Repository\BotRepository;
+use App\Service\BotInfoService;
 use App\Service\BotResponder\BotResponderInterface;
 use App\Service\TokenEncryptionService;
 use Psr\Log\LoggerInterface;
@@ -18,6 +19,7 @@ class BotWebhookController extends AbstractController
         private readonly BotRepository          $botRepository,
         private readonly BotResponderInterface  $responder,
         private readonly TokenEncryptionService $encryption,
+        private readonly BotInfoService         $botInfoService,
         private readonly LoggerInterface        $logger,
     )
     {
@@ -51,6 +53,13 @@ class BotWebhookController extends AbstractController
         }
 
         try {
+            if (str_starts_with($messageText, '/start')) {
+                $name = $this->botInfoService->getDisplayName($bot);
+                $token = $bot->getToken($this->encryption);
+                (new Nutgram($token))->sendMessage("✅ {$name} is active and working.", chat_id: $chatId);
+                return new Response('', Response::HTTP_OK);
+            }
+
             $reply = $this->responder->respond($bot, $messageText);
 
             if ($reply !== null) {

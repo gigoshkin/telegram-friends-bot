@@ -2,6 +2,7 @@
 /** @var SergiX44\Nutgram\Nutgram $bot */
 
 use App\Telegram\Command\BotsCommand;
+use App\Telegram\Command\ExportsCommand;
 use App\Telegram\Command\StartCommand;
 use App\Telegram\Conversation\AddBotConversation;
 use App\Telegram\Conversation\BotConfigConversation;
@@ -12,6 +13,9 @@ use App\Telegram\Handler\BotDeleteConfirmHandler;
 use App\Telegram\Handler\BotDeleteHandler;
 use App\Telegram\Handler\BotDetailHandler;
 use App\Telegram\Handler\BotsMenuHandler;
+use App\Telegram\Handler\ExportDeleteConfirmHandler;
+use App\Telegram\Handler\ExportDeleteHandler;
+use App\Telegram\Handler\ExportsMenuHandler;
 use App\Telegram\Handler\SelectTargetHandler;
 use Psr\Log\LoggerInterface;
 use SergiX44\Nutgram\Conversations\Conversation;
@@ -39,6 +43,7 @@ $bot->registerApiException(QueryTooOldException::class);
 
 $bot->registerCommand(StartCommand::class);
 $bot->registerCommand(BotsCommand::class);
+$bot->registerCommand(ExportsCommand::class);
 
 $bot->onCallbackQueryData('add_bot', function (Nutgram $bot) {
     $bot->answerCallbackQuery();
@@ -54,3 +59,7 @@ $bot->onCallbackQueryData('bot_debug_toggle:.*', BotDebugToggleHandler::class);
 $bot->onCallbackQueryData('bot_response_mode:.*', BotResponseModeHandler::class);
 
 $bot->onCallbackQueryData('select_target:.*', SelectTargetHandler::class);
+
+$bot->onCallbackQueryData('exports_menu', ExportsMenuHandler::class);
+$bot->onCallbackQueryData('export_delete:.*', ExportDeleteHandler::class);
+$bot->onCallbackQueryData('export_delete_confirm:.*', ExportDeleteConfirmHandler::class);
