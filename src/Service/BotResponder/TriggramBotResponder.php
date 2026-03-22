@@ -26,7 +26,9 @@ class TriggramBotResponder implements BotResponderInterface
         if ($bot->getResponseProbability() < 1.0
             && (mt_rand() / mt_getrandmax()) > $bot->getResponseProbability()
         ) {
-            return null;
+            return $bot->isDebugMode()
+                ? '<code>[decided not to respond · probability check failed]</code>'
+                : null;
         }
 
         $text = trim($incomingMessage);
@@ -57,6 +59,10 @@ class TriggramBotResponder implements BotResponderInterface
         }
 
         if (empty($directPairs) && empty($seqPairs)) {
+            if ($bot->isDebugMode()) {
+                $minStr = round($minSimilarity, 2);
+                return "<code>[no candidates found · min: {$minStr} · direct: {$directMs}ms]</code>";
+            }
             return null;
         }
 

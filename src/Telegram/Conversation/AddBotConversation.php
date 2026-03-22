@@ -293,8 +293,7 @@ class AddBotConversation extends Conversation
         $this->em->flush();
 
         $bot->answerCallbackQuery();
-        $bot->editMessageReplyMarkup(reply_markup: null);
-        $bot->sendMessage(
+        $bot->editMessageText(
             "✅ Done\\! Your bot is now imitating *{$senderName}*\\.\n\nAdd it to a group chat and watch it go\\! 🎭",
             parse_mode: ParseMode::MARKDOWN,
         );
