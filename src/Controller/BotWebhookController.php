@@ -35,6 +35,11 @@ class BotWebhookController extends AbstractController
             return new Response('', Response::HTTP_OK);
         }
 
+        $secret = $bot->getWebhookSecret();
+        if ($secret !== null && !hash_equals($secret, (string) $request->headers->get('X-Telegram-Bot-Api-Secret-Token', ''))) {
+            return new Response('', Response::HTTP_OK);
+        }
+
         $data = json_decode($request->getContent(), true);
 
         $messageText = $data['message']['text'] ?? null;

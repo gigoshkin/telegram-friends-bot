@@ -74,6 +74,9 @@ class Bot
     #[ORM\Column(type: Types::FLOAT, options: ['default' => 0.0])]
     private float $ftsWeight = 0.0;
 
+    #[ORM\Column(length: 64, nullable: true)]
+    private ?string $webhookSecret = null;
+
     /**
      * @var Collection<int, ChatExportUploadLink>
      */
@@ -300,6 +303,18 @@ class Bot
     public function setFtsWeight(float $ftsWeight): static
     {
         $this->ftsWeight = max(0.0, min(1.0, $ftsWeight));
+
+        return $this;
+    }
+
+    public function getWebhookSecret(): ?string
+    {
+        return $this->webhookSecret;
+    }
+
+    public function setWebhookSecret(?string $webhookSecret): static
+    {
+        $this->webhookSecret = $webhookSecret;
 
         return $this;
     }

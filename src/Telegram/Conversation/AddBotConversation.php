@@ -270,9 +270,6 @@ class AddBotConversation extends Conversation
 
         $botEntity->setTargetFromId($fromId);
         $this->botTrainer->train($botEntity);
-        $botEntity->setIsTrained(true);
-        $botEntity->setIsBeingTrained(false);
-        $this->em->flush();
 
         try {
             $this->webhookRegistrar->register($botEntity);
@@ -281,7 +278,19 @@ class AddBotConversation extends Conversation
                 'bot_id' => $botEntity->getId(),
                 'error' => $e->getMessage(),
             ]);
+            $bot->answerCallbackQuery();
+            $bot->sendMessage(
+                "❌ Failed to activate the bot — could not register the webhook with Telegram\\. " .
+                "Please check that the bot token is valid and try again with /start\\.",
+                parse_mode: ParseMode::MARKDOWN,
+            );
+            $this->end();
+            return;
         }
+
+        $botEntity->setIsTrained(true);
+        $botEntity->setIsBeingTrained(false);
+        $this->em->flush();
 
         $bot->answerCallbackQuery();
         $bot->editMessageReplyMarkup(reply_markup: null);
