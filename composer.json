@@ -15,6 +15,7 @@
         "doctrine/orm": "^3.6",
         "halaxa/json-machine": "^1.2",
         "nutgram/symfony-bundle": "^1.1",
+        "sentry/sentry-symfony": "^5.9",
         "stof/doctrine-extensions-bundle": "^1.15",
         "symfony/asset": "7.4.*",
         "symfony/asset-mapper": "7.4.*",
