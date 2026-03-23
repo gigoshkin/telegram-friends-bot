@@ -3,10 +3,13 @@
 namespace App\Telegram\Handler;
 
 use App\Entity\Bot;
+use App\Entity\ChatMessage;
+use App\Repository\ChatMessageRepository;
 use App\Service\BotTrainer\BotTrainerInterface;
 use App\Service\BotWebhookRegistrar;
 use Doctrine\ORM\EntityManagerInterface;
 use SergiX44\Nutgram\Nutgram;
+use SergiX44\Nutgram\Telegram\Properties\ParseMode;
 
 readonly class SelectTargetHandler
 {
@@ -48,9 +51,13 @@ readonly class SelectTargetHandler
         $entity->setIsTrained(true);
         $this->em->flush();
 
-        $bot->sendMessage(
-            "✅ Bot is ready! Add it to a group and it will imitate your chosen friend.",
-            chat_id: $bot->callbackQuery()?->from->id,
+        /** @var ChatMessageRepository $repo */
+        $repo = $this->em->getRepository(ChatMessage::class);
+        $senderName = $repo->findSenderName($entity->getChatExportFile(), $fromId) ?? $fromId;
+
+        $bot->editMessageText(
+            "✅ Done\\! Your bot is now imitating *{$senderName}*\\.\n\nAdd it to a group chat and watch it go\\! 🎭",
+            parse_mode: ParseMode::MARKDOWN,
         );
     }
 }

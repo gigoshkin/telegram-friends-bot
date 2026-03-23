@@ -11,7 +11,7 @@ export DATABASE_URL="${DATABASE_URL:-postgresql://app:${POSTGRES_PASSWORD}@127.0
 if [ ! -s "${PG_DATA}/PG_VERSION" ]; then
     echo "==> Initializing PostgreSQL data directory..."
     install -d -m 0700 -o postgres "${PG_DATA}"
-    su -m postgres -c "${PG_BIN}/initdb -D ${PG_DATA} --username=postgres --auth-local=trust --auth-host=md5"
+    su -m postgres -c "${PG_BIN}/initdb -D ${PG_DATA} --username=postgres --auth-local=trust --auth-host=md5 --encoding=UTF8 --locale=C.UTF-8"
     echo "==> PostgreSQL initialized."
 fi
 
@@ -25,7 +25,7 @@ su -m postgres -c "psql -tc \"SELECT 1 FROM pg_roles WHERE rolname='app'\" | gre
     psql -c \"CREATE USER app WITH PASSWORD '${POSTGRES_PASSWORD}';\"" || true
 
 su -m postgres -c "psql -tc \"SELECT 1 FROM pg_database WHERE datname='app'\" | grep -q 1 || \
-    psql -c \"CREATE DATABASE app OWNER app;\"" || true
+    psql -c \"CREATE DATABASE app OWNER app ENCODING 'UTF8' LC_COLLATE 'C.UTF-8' LC_CTYPE 'C.UTF-8' TEMPLATE template0;\"" || true
 
 su -m postgres -c "psql -d app -c \"CREATE EXTENSION IF NOT EXISTS pg_trgm;\"" || true
 
