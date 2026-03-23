@@ -87,6 +87,9 @@ USER appuser
 # ── Stage 4: caprover ─────────────────────────────────────────────────────────
 FROM frankenphp_prod AS caprover
 
+ARG SENTRY_RELEASE
+ENV SENTRY_RELEASE=${SENTRY_RELEASE}
+
 USER root
 
 # Install PostgreSQL 16, Redis, supervisord, curl (for healthcheck)
