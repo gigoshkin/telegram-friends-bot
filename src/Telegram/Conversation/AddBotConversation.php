@@ -266,8 +266,6 @@ class AddBotConversation extends Conversation
             return;
         }
 
-        $senderName = array_values($match)[0]['sender'];
-
         $botEntity->setTargetFromId($fromId);
         $this->botTrainer->train($botEntity);
 
@@ -291,12 +289,6 @@ class AddBotConversation extends Conversation
         $botEntity->setIsTrained(true);
         $botEntity->setIsBeingTrained(false);
         $this->em->flush();
-
-        $bot->answerCallbackQuery();
-        $bot->editMessageText(
-            "✅ Done\\! Your bot is now imitating *{$senderName}*\\.\n\nAdd it to a group chat and watch it go\\! 🎭",
-            parse_mode: ParseMode::MARKDOWN,
-        );
 
         $this->end();
     }

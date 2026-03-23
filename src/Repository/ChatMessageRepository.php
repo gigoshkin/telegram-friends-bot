@@ -36,6 +36,23 @@ class ChatMessageRepository extends ServiceEntityRepository
             ->getArrayResult();
     }
 
+    public function findSenderName(?\App\Entity\ChatExportFile $file, string $fromId): ?string
+    {
+        if ($file === null) {
+            return null;
+        }
+
+        return $this->createQueryBuilder('m')
+            ->select('m.sender')
+            ->where('m.chatExportFile = :file')
+            ->andWhere('m.fromId = :fromId')
+            ->setParameter('file', $file)
+            ->setParameter('fromId', $fromId)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     /**
      * Returns the best-matching (trigger_text, reply_text) pairs for an incoming message,
      * ranked by pg_trgm trigram similarity directly in the database.
@@ -116,7 +133,7 @@ class ChatMessageRepository extends ServiceEntityRepository
         $sql = <<<SQL
             SELECT
                 trigger_msg.text AS trigger_text,
-                response.text    AS reply_text,
+                next_msg.text    AS reply_text,
                 (
                     :trgm_weight * similarity(lower(regexp_replace(trigger_msg.text, '@\w+\s*', '', 'g')), lower(:incoming))
                   + :fts_weight  * ts_rank(
@@ -125,14 +142,17 @@ class ChatMessageRepository extends ServiceEntityRepository
                     )
                 ) AS score
             FROM chat_message trigger_msg
-            JOIN chat_message response
-                ON  response.chat_export_file_id           = :file_id
-                AND response.from_id                       = :from_id
-                AND response.reply_to_telegram_message_id  IS NULL
-                AND response.text                          IS NOT NULL
-                AND response.telegram_message_id           > trigger_msg.telegram_message_id
-                AND response.sent_at - trigger_msg.sent_at <= interval '1 minute'
-                AND response.sent_at                       > trigger_msg.sent_at
+            JOIN LATERAL (
+                SELECT cm.text, cm.from_id, cm.sent_at, cm.reply_to_telegram_message_id
+                FROM chat_message cm
+                WHERE cm.chat_export_file_id = :file_id
+                  AND cm.telegram_message_id > trigger_msg.telegram_message_id
+                ORDER BY cm.telegram_message_id ASC
+                LIMIT 1
+            ) next_msg ON next_msg.from_id                      = :from_id
+                      AND next_msg.reply_to_telegram_message_id IS NULL
+                      AND next_msg.text                         IS NOT NULL
+                      AND next_msg.sent_at - trigger_msg.sent_at <= interval '1 minute'
             WHERE trigger_msg.chat_export_file_id = :file_id
               AND trigger_msg.from_id             != :from_id
               AND trigger_msg.text                IS NOT NULL
